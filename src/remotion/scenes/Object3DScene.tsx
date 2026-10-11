@@ -178,23 +178,65 @@ const Label: React.FC<{ text: string; at: number; side: "left" | "right"; row: n
   );
 };
 
+/** True when this browser can create a WebGL context (some CI browsers can't). */
+function useWebGL(): boolean {
+  return useMemo(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      return Boolean(canvas.getContext("webgl2") ?? canvas.getContext("webgl"));
+    } catch {
+      return false;
+    }
+  }, []);
+}
+
+/** CSS-3D stand-in used when WebGL is unavailable: glowing core with tilted orbit rings. */
+const OrbitalFallback: React.FC<{ frame: number; theme: Theme; scale: number }> = ({ frame, theme, scale }) => (
+  <div style={{ position: "absolute", left: "50%", top: "52%", width: 0, height: 0, perspective: 1400, scale: String(scale) }}>
+    <div
+      style={{
+        position: "absolute", width: 220, height: 220, left: -110, top: -110, borderRadius: "50%",
+        background: `radial-gradient(circle at 35% 30%, #fff, ${theme.accent} 35%, ${theme.bg2} 80%)`,
+        boxShadow: `0 0 120px ${theme.accent}`,
+      }}
+    />
+    {[0, 60, 120].map((tilt, i) => (
+      <div
+        key={i}
+        style={{
+          position: "absolute", width: 640, height: 640, left: -320, top: -320, borderRadius: "50%",
+          border: `3px solid ${i === 1 ? theme.accent2 : theme.accent}`, opacity: 0.7, transformStyle: "preserve-3d",
+          transform: `rotateZ(${tilt}deg) rotateX(72deg) rotateZ(${frame * (i % 2 ? -1.6 : 1.6)}deg)`,
+        }}
+      >
+        <div style={{ position: "absolute", left: 300, top: -14, width: 28, height: 28, borderRadius: 14, background: "#fff", boxShadow: `0 0 30px ${theme.accent}` }} />
+      </div>
+    ))}
+  </div>
+);
+
 export const Object3DScene: React.FC<SceneProps<"object3d">> = ({ visual, reveals, theme }) => {
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
+  const webgl = useWebGL();
   const Model = MODELS[visual.model] ?? Crystal;
   const intro = spring({ frame, fps, config: { damping: 18, stiffness: 90 } });
   const camZ = interpolate(frame, [0, 300], [9, 7.6], { extrapolateRight: "clamp" });
   return (
     <div style={{ position: "relative", width, height }}>
-      <ThreeCanvas width={width} height={height} camera={{ position: [0, 0, camZ], fov: 45 }}>
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 6, 5]} intensity={1.6} />
-        <pointLight position={[-4, -2, 3]} intensity={30} color={theme.accent2} />
-        <pointLight position={[4, 2, -3]} intensity={25} color={theme.accent} />
-        <group scale={intro} rotation={[0, (1 - intro) * -2, 0]}>
-          <Model frame={frame} theme={theme} />
-        </group>
-      </ThreeCanvas>
+      {webgl ? (
+        <ThreeCanvas width={width} height={height} camera={{ position: [0, 0, camZ], fov: 45 }}>
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[5, 6, 5]} intensity={1.6} />
+          <pointLight position={[-4, -2, 3]} intensity={30} color={theme.accent2} />
+          <pointLight position={[4, 2, -3]} intensity={25} color={theme.accent} />
+          <group scale={intro} rotation={[0, (1 - intro) * -2, 0]}>
+            <Model frame={frame} theme={theme} />
+          </group>
+        </ThreeCanvas>
+      ) : (
+        <OrbitalFallback frame={frame} theme={theme} scale={intro} />
+      )}
       <div style={{ position: "absolute", top: 90, left: 0, right: 0, textAlign: "center", fontFamily: DISPLAY_FONT, fontSize: 64, fontWeight: 900, color: theme.text, textShadow: "0 4px 30px rgba(0,0,0,0.6)" }}>
         {visual.heading}
       </div>

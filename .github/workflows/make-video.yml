@@ -86,7 +86,11 @@ jobs:
           sudo apt-get install -y -qq ffmpeg fonts-noto-core fonts-noto-color-emoji fonts-noto-ui-core >/dev/null
       - run: npm ci --no-fund --no-audit
       - name: Prepare headless browser
-        run: npx remotion browser ensure
+        # Playwright's headless Chromium can create WebGL contexts (for the 3D scenes)
+        # on GPU-less runners with the "angle" backend; Remotion's default download can't.
+        run: |
+          npx -y playwright@1.56.0 install --only-shell chromium
+          echo "REMOTION_BROWSER_EXECUTABLE=$(find ~/.cache/ms-playwright -type f -name headless_shell | head -1)" >> "$GITHUB_ENV"
       - name: Make the video
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
