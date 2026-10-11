@@ -1,4 +1,5 @@
 {
   "plan": "examples/demo-plan.json",
-  "tts": "edge"
+  "tts": "edge",
+  "captions": true
 }

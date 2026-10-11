@@ -23,6 +23,7 @@ type EdgeMetadata = {
 
 export const edgeTts: TtsProvider = {
   name: "edge",
+  concurrency: 2,
   async synthesize(text, outBase, { language, voice }) {
     const name = voice ?? DEFAULT_VOICES[language.split("-")[0]] ?? DEFAULT_VOICES.en;
     const tts = new MsEdgeTTS();

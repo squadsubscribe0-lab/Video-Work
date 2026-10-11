@@ -7,6 +7,7 @@ const WORDS_PER_SECOND = 2.5; // ~150 wpm, typical explainer pace
 
 export const mockTts: TtsProvider = {
   name: "mock",
+  concurrency: 4,
   async synthesize(text, outBase) {
     const words = text.split(/\s+/).filter(Boolean).length;
     const seconds = Math.max(1.5, words / WORDS_PER_SECOND);

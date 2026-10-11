@@ -10,6 +10,8 @@ export type TtsResult = {
 
 export interface TtsProvider {
   name: string;
+  /** How many scenes may be synthesised at once without upsetting the service. */
+  concurrency: number;
   /** Writes audio for `text` to `outBase` + an extension of the provider's choice. */
   synthesize(text: string, outBase: string, opts: TtsOptions): Promise<TtsResult>;
 }

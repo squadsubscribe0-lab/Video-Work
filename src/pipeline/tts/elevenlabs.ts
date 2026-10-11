@@ -31,6 +31,7 @@ export function alignmentToWords(a: Alignment): WordTiming[] {
 
 export const elevenLabsTts: TtsProvider = {
   name: "elevenlabs",
+  concurrency: 3,
   async synthesize(text, outBase, { voice }) {
     const key = process.env.ELEVENLABS_API_KEY;
     if (!key) throw new Error("ELEVENLABS_API_KEY is not set");

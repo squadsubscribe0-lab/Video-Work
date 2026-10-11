@@ -7,12 +7,14 @@ import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, TRANSITION_FR
 import { audioDuration } from "./media";
 import type { TtsProvider } from "./tts";
 
-async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+// Free TTS endpoints drop connections now and then; back off and try again.
+async function withRetry<T>(fn: () => Promise<T>, tries = 5): Promise<T> {
   for (let i = 1; ; i++) {
     try {
       return await fn();
     } catch (err) {
       if (i >= tries) throw err;
+      console.warn(`\n   retry ${i}/${tries - 1}: ${err instanceof Error ? err.message : err}`);
       await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
     }
   }
@@ -39,7 +41,7 @@ export async function voiceOver(
   opts: { fps: number; voice?: string; onProgress?: (done: number, total: number) => void },
 ): Promise<TimedScene[]> {
   let done = 0;
-  return mapLimit(plan.scenes, 4, async (scene, i) => {
+  return mapLimit(plan.scenes, tts.concurrency, async (scene, i) => {
     const base = path.join(jobDir, `scene-${String(i + 1).padStart(2, "0")}`);
     const res = await withRetry(() =>
       tts.synthesize(scene.narration, base, { language: plan.language, voice: opts.voice }),

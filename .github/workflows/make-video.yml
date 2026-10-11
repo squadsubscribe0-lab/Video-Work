@@ -107,7 +107,7 @@ jobs:
         run: |
           if [ -f "jobs/$NAME/video.mp4" ]; then
             title=$(jq -r .title "jobs/$NAME/plan.json")
-            secs=$(jq '[.scenes[].durationInFrames] | add / 30 | floor' "jobs/$NAME/props.json")
+            secs=$(jq '[.scenes[] | .durationInFrames - .transitionFrames] | add / 30 | floor' "jobs/$NAME/props.json")
             echo "### ✅ $title ($((secs / 60))m $((secs % 60))s)" >> "$GITHUB_STEP_SUMMARY"
             echo "Download it from **Artifacts** below: \`video-$NAME\`." >> "$GITHUB_STEP_SUMMARY"
           else
