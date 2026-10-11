@@ -41,6 +41,6 @@ Each vendored MIT skill keeps its upstream `LICENSE` file in its folder.
 | Transitions and cinematic cuts | `@remotion/transitions` + custom CSS presentations | fade/slide/iris/push-cut built in; whip-pan, glitch, flash, light leak are ours. |
 | Maps | `d3-geo` + `world-atlas` | Fully offline (no Mapbox token); globe and flat zoom with animated routes. |
 | Maths and diagrams (3B1B style) | **Manim CE** | Best-in-class for equations and geometry; render clips and drop them into Remotion. |
-| 3D | **Three.js via `@remotion/three`** (in use), or Blender (`bpy`) | Three.js stays in the same timeline; rendered with software WebGL (`swangle`) so it works on CI. Blender for high-end shots. |
+| 3D | **Three.js via `@remotion/three`** (in use), or Blender (`bpy`) | Three.js stays in the same timeline; rendered with the `angle` WebGL backend, which also works on CPU-only CI runners. Blender for high-end shots. |
 | AI footage and images | Video/image generation APIs | B-roll for specific beats; expensive, so it should be used sparingly. |
 | Voice | Edge TTS (free) / ElevenLabs (paid) | Both return word timings, which drive all sync. |

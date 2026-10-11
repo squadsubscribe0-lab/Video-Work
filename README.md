@@ -60,7 +60,7 @@ npm run studio                                             # Studio with the dem
 | `ELEVENLABS_API_KEY` | `--tts elevenlabs` |
 | `SCRIPT_MODEL` | Override the Claude model (default `claude-opus-5-5`) |
 | `REMOTION_BROWSER_EXECUTABLE` | Use an existing Chrome/Chromium instead of Remotion's download |
-| `REMOTION_GL` | WebGL backend for 3D: `swangle` (default, works on CI) or `angle` (GPU) |
+| `REMOTION_GL` | WebGL backend for 3D scenes (default `angle`, works without a GPU) |
 
 ## What's in a video
 
