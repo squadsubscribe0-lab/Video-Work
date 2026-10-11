@@ -2,7 +2,8 @@
 // (the audio is the master clock, so visuals and captions can never drift).
 import path from "node:path";
 import type { TimedScene, VideoPlan } from "../shared/schema";
-import { computeReveals, cuesOf, estimateWordTimings, sceneFrames } from "../shared/timing";
+import { sfxFor } from "../shared/sfx";
+import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, TRANSITION_FRAMES } from "../shared/timing";
 import { audioDuration } from "./media";
 import type { TtsProvider } from "./tts";
 
@@ -46,13 +47,17 @@ export async function voiceOver(
     const duration = await audioDuration(res.audioPath);
     const words = res.words ?? estimateWordTimings(scene.narration, duration);
     opts.onProgress?.(++done, plan.scenes.length);
+    const reveals = computeReveals(cuesOf(scene.visual), words, duration, opts.fps);
+    const isFirst = i === 0;
     return {
       ...scene,
       audioFile: path.basename(res.audioPath),
       audioDuration: duration,
       durationInFrames: sceneFrames(duration, opts.fps),
       words,
-      reveals: computeReveals(cuesOf(scene.visual), words, duration, opts.fps),
+      reveals,
+      transitionFrames: isFirst ? 0 : TRANSITION_FRAMES[scene.transition],
+      sfx: sfxFor(scene.visual, scene.transition, reveals, { isFirst, isLast: i === plan.scenes.length - 1 }),
     };
   });
 }

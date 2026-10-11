@@ -9,18 +9,21 @@
 - 4 colour themes, animated background, progress bar
 - Editable `plan.json` → re-render without calling Claude again
 
-## Phase 2: richer visuals
+## ✅ v2: motion graphics, sound, 3D, maps
+
+- Cinematic transitions (whip, glitch, flash, push-cut zoom, iris, light leak, slide, fade)
+- Camera rig (push-in, drift, punch on reveals), letterbox, film grain, vignette, living background
+- Sound effects on every transition and reveal, generated music bed with ducking
+- Kinetic typography and trailer-style titles
+- Offline maps: rotating globe and zooming flat map with pins and animated routes
+- 3D hero objects with Three.js
+
+## Phase 3: richer visuals
 
 - AI images per scene (e.g. Flux / Imagen) with Ken Burns pan/zoom
 - Stock footage B-roll (Pexels / Pixabay APIs)
-- Background music with automatic ducking under the voice
-- Sound effects on reveals (whoosh, pop)
-- Scene transitions with `@remotion/transitions`
-
-## Phase 3: 2D/3D and maths
-
 - Manim CE renderer for maths/diagram scenes (render clip → embed in Remotion)
-- 3D scenes with `@remotion/three` (globe, rotating objects, data in 3D)
+- 3D charts and custom 3D models (glTF)
 - Lottie animations / character presets
 
 ## Phase 4: long-form (10 min) and quality

@@ -6,15 +6,52 @@
     {
       "id": "s01",
       "narration": "Every time you open a website, your request crosses oceans and comes back in less than a second. How is that even possible?",
-      "visual": { "type": "title", "heading": "How the Internet Actually Works", "subheading": "From your click to the world, and back" }
+      "visual": { "type": "title", "heading": "How the Internet Actually Works", "subheading": "From your click to the world, and back" },
+      "transition": "fade"
     },
     {
       "id": "s02",
-      "narration": "Over ninety five percent of data between continents doesn't fly through space. It travels through cables lying on the ocean floor.",
-      "visual": { "type": "stat", "value": "95%", "label": "of intercontinental data", "context": "travels through undersea fibre-optic cables" }
+      "narration": "One click. Thousands of kilometres. A fraction of a second.",
+      "visual": {
+        "type": "kinetic",
+        "lines": [
+          { "text": "One click", "cue": "One click" },
+          { "text": "Thousands of km", "cue": "Thousands of kilometres" },
+          { "text": "A fraction of a second", "cue": "fraction of a" }
+        ]
+      },
+      "transition": "flash"
     },
     {
       "id": "s03",
+      "narration": "Over ninety five percent of data between continents doesn't fly through space. It travels through cables lying on the ocean floor.",
+      "visual": { "type": "stat", "value": "95%", "label": "of intercontinental data", "context": "travels through undersea fibre-optic cables" },
+      "transition": "zoom"
+    },
+    {
+      "id": "s04",
+      "narration": "A request from New York can race under the Atlantic to London, on to Mumbai, and all the way to Singapore.",
+      "visual": {
+        "type": "map",
+        "style": "flat",
+        "heading": "Under the sea",
+        "highlight": [],
+        "points": [
+          { "label": "New York", "lat": 40.71, "lon": -74.0, "cue": "from New York" },
+          { "label": "London", "lat": 51.51, "lon": -0.13, "cue": "to London" },
+          { "label": "Mumbai", "lat": 19.08, "lon": 72.88, "cue": "to Mumbai" },
+          { "label": "Singapore", "lat": 1.35, "lon": 103.82, "cue": "to Singapore" }
+        ],
+        "routes": [
+          { "from": "New York", "to": "London" },
+          { "from": "London", "to": "Mumbai" },
+          { "from": "Mumbai", "to": "Singapore" }
+        ]
+      },
+      "transition": "whip"
+    },
+    {
+      "id": "s05",
       "narration": "When you type an address, four things happen. Your device asks DNS for the server's number. It opens a connection. It sends the request. And the server sends back the page.",
       "visual": {
         "type": "process",
@@ -25,24 +62,27 @@
           { "text": "Send the request", "cue": "sends the request" },
           { "text": "Page comes back", "cue": "server sends back" }
         ]
-      }
+      },
+      "transition": "slide"
     },
     {
-      "id": "s04",
-      "narration": "Your data never travels as one big file. It is chopped into small packets. Each packet can take a different route. They are put back together at the other end.",
+      "id": "s06",
+      "narration": "Your data is chopped into small packets. Each one hops between routers, and they are put back together at the other end.",
       "visual": {
-        "type": "bullets",
-        "heading": "Packets, not files",
-        "points": [
-          { "text": "Data is split into packets", "cue": "chopped into small" },
-          { "text": "Each takes its own route", "cue": "take a different" },
-          { "text": "Reassembled at the destination", "cue": "put back together" }
+        "type": "object3d",
+        "heading": "A mesh of routers",
+        "model": "network",
+        "labels": [
+          { "text": "Small packets", "cue": "into small packets" },
+          { "text": "Router hops", "cue": "hops between routers" },
+          { "text": "Reassembled", "cue": "put back together" }
         ]
-      }
+      },
+      "transition": "glitch"
     },
     {
-      "id": "s05",
-      "narration": "Think of it like mailing a book one page at a time. Old phone networks reserved one line for the whole call. The internet shares every line between everyone.",
+      "id": "s07",
+      "narration": "Old phone networks reserved one line for the whole call. The internet shares every line between everyone.",
       "visual": {
         "type": "comparison",
         "heading": "Two ways to send data",
@@ -50,10 +90,11 @@
         "leftPoints": [{ "text": "One reserved line per call", "cue": "reserved one line" }],
         "rightTitle": "The internet",
         "rightPoints": [{ "text": "Every line is shared", "cue": "shares every line" }]
-      }
+      },
+      "transition": "iris"
     },
     {
-      "id": "s06",
+      "id": "s08",
       "narration": "Distance still matters. As a rough illustration, a server in your city might answer in ten milliseconds, one across the country in fifty, and one on another continent in about one hundred and fifty.",
       "visual": {
         "type": "barChart",
@@ -64,23 +105,28 @@
           { "label": "Across country", "value": 50, "cue": "across the country" },
           { "label": "Other continent", "value": 150, "cue": "on another continent" }
         ]
-      }
+      },
+      "transition": "slide"
     },
     {
-      "id": "s07",
-      "narration": "Along the way your packets meet routers that pick the next hop, switches that connect local devices, and data centres where websites actually live.",
+      "id": "s09",
+      "narration": "The websites themselves live in giant data centres, clustered in places like Northern Virginia, Dublin and Singapore.",
       "visual": {
-        "type": "iconGrid",
-        "heading": "Who handles your packets",
-        "items": [
-          { "emoji": "🧭", "label": "Routers", "cue": "meet routers that" },
-          { "emoji": "🔀", "label": "Switches", "cue": "switches that connect" },
-          { "emoji": "🏢", "label": "Data centres", "cue": "and data centres" }
-        ]
-      }
+        "type": "map",
+        "style": "globe",
+        "heading": "Where websites live",
+        "highlight": ["United States of America", "Ireland", "Singapore"],
+        "points": [
+          { "label": "N. Virginia", "lat": 39.04, "lon": -77.49, "cue": "like Northern Virginia" },
+          { "label": "Dublin", "lat": 53.35, "lon": -6.26, "cue": "Dublin and" },
+          { "label": "Singapore", "lat": 1.35, "lon": 103.82, "cue": "and Singapore" }
+        ],
+        "routes": []
+      },
+      "transition": "lightLeak"
     },
     {
-      "id": "s08",
+      "id": "s10",
       "narration": "It started in nineteen sixty nine with ARPANET. In nineteen eighty three it switched to TCP IP. In nineteen ninety one the World Wide Web opened to the public.",
       "visual": {
         "type": "timeline",
@@ -90,15 +136,17 @@
           { "date": "1983", "label": "Switch to TCP/IP", "cue": "nineteen eighty three" },
           { "date": "1991", "label": "The Web goes public", "cue": "nineteen ninety one" }
         ]
-      }
+      },
+      "transition": "fade"
     },
     {
-      "id": "s09",
+      "id": "s11",
       "narration": "At the twenty twelve London Olympics, the inventor of the web, Tim Berners-Lee, summed it up in four words.",
-      "visual": { "type": "quote", "text": "This is for everyone.", "author": "Tim Berners-Lee, 2012" }
+      "visual": { "type": "quote", "text": "This is for everyone.", "author": "Tim Berners-Lee, 2012" },
+      "transition": "lightLeak"
     },
     {
-      "id": "s10",
+      "id": "s12",
       "narration": "So remember: addresses are looked up, data is split into packets, and cables under the sea carry it around the world. If this helped, subscribe for more.",
       "visual": {
         "type": "bullets",
@@ -108,7 +156,8 @@
           { "text": "Packets carry the data", "cue": "split into packets" },
           { "text": "Undersea cables connect it all", "cue": "cables under the" }
         ]
-      }
+      },
+      "transition": "zoom"
     }
   ]
 }

@@ -16,7 +16,10 @@ export async function renderVideo(
   });
   const browserExecutable = process.env.REMOTION_BROWSER_EXECUTABLE ?? null;
   const inputProps = props as unknown as Record<string, unknown>;
-  const composition = await selectComposition({ serveUrl, id: "Explainer", inputProps, browserExecutable });
+  // WebGL for the 3D scenes: "swangle" (software) works everywhere incl. CI; use
+  // REMOTION_GL=angle on a machine with a GPU for faster 3D.
+  const chromiumOptions = { gl: (process.env.REMOTION_GL ?? "swangle") as "swangle" | "angle" };
+  const composition = await selectComposition({ serveUrl, id: "Explainer", inputProps, browserExecutable, chromiumOptions });
   await renderMedia({
     serveUrl,
     composition,
@@ -24,6 +27,7 @@ export async function renderVideo(
     codec: "h264",
     outputLocation: outFile,
     browserExecutable,
+    chromiumOptions,
     onProgress: ({ progress }) => onProgress?.(progress),
   });
 }

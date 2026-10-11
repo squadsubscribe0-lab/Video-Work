@@ -1,6 +1,6 @@
 // Pure timing helpers: they turn narration word timings into frame-accurate reveal
 // points, so every on-screen element appears exactly when the voice mentions it.
-import type { Visual, WordTiming } from "./schema";
+import type { Transition, Visual, WordTiming } from "./schema";
 
 export const LEAD_IN_SECONDS = 0.35; // silence before the voice starts in each scene
 export const TAIL_SECONDS = 0.6; // breathing room after the voice ends
@@ -24,6 +24,12 @@ export function cuesOf(visual: Visual): string[] {
       return visual.items.map((i) => i.cue);
     case "timeline":
       return visual.events.map((e) => e.cue);
+    case "kinetic":
+      return visual.lines.map((l) => l.cue);
+    case "map":
+      return visual.points.map((p) => p.cue);
+    case "object3d":
+      return visual.labels.map((l) => l.cue);
     default:
       return [];
   }
@@ -112,4 +118,22 @@ export function captionLines(words: WordTiming[], maxWords = 7): WordTiming[][] 
   }
   if (cur.length) lines.push(cur);
   return lines;
+}
+
+/** Frames a transition overlaps the previous scene. Cut-style transitions (cut, flash,
+ * lightLeak) don't overlap; they're drawn as an overlay at the start of the new scene. */
+export const TRANSITION_FRAMES: Record<Transition, number> = {
+  cut: 0, flash: 0, lightLeak: 0, fade: 18, slide: 16, zoom: 16, whip: 12, glitch: 10, iris: 18,
+};
+
+/** Start frame of each scene on the final timeline, plus the total length. */
+export function sceneStarts(scenes: { durationInFrames: number; transitionFrames: number }[]) {
+  const starts: number[] = [];
+  let t = 0;
+  scenes.forEach((s, i) => {
+    t -= i === 0 ? 0 : s.transitionFrames;
+    starts.push(t);
+    t += s.durationInFrames;
+  });
+  return { starts, total: Math.max(1, t) };
 }

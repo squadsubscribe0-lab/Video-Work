@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { alignmentToWords } from "../pipeline/tts/elevenlabs";
-import { captionLines, computeReveals, estimateWordTimings, findCue, LEAD_IN_SECONDS } from "./timing";
+import { sfxFor } from "./sfx";
+import { captionLines, computeReveals, estimateWordTimings, findCue, LEAD_IN_SECONDS, sceneStarts } from "./timing";
 
 const words = "Your data is chopped into small packets, and each packet can take a different route."
   .split(" ")
@@ -54,4 +55,21 @@ test("alignmentToWords folds ElevenLabs character alignment into words", () => {
   });
   assert.deepEqual(w.map((x) => x.text), ["Hi", "you"]);
   assert.equal(w[1].start, 0.30000000000000004);
+});
+
+test("sceneStarts subtracts transition overlaps", () => {
+  const { starts, total } = sceneStarts([
+    { durationInFrames: 100, transitionFrames: 0 },
+    { durationInFrames: 80, transitionFrames: 20 },
+    { durationInFrames: 60, transitionFrames: 0 },
+  ]);
+  assert.deepEqual(starts, [0, 80, 160]);
+  assert.equal(total, 220);
+});
+
+test("sfxFor adds transition, reveal and finale sounds", () => {
+  const visual = { type: "bullets" as const, heading: "h", points: [{ text: "a", cue: "a" }, { text: "b", cue: "b" }] };
+  const cues = sfxFor(visual, "whip", [30, 60], { isFirst: false, isLast: true });
+  assert.deepEqual(cues.map((c) => [c.name, c.frame]), [["whip", 0], ["pop", 30], ["pop", 60], ["ding", 66]]);
+  assert.equal(sfxFor(visual, "whip", [30], { isFirst: true, isLast: false })[0].name, "pop");
 });

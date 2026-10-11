@@ -23,13 +23,26 @@ Narration rules:
 - Spell numbers the way they should be read aloud only when ambiguous; otherwise digits are fine.
 - 15-45 words per scene. Vary scene length for rhythm.
 
-Visual rules:
-- First scene is "title". Use a variety of visual types; never the same type 3 times in a row.
+Visual rules (this is a motion-graphics video, not a slideshow):
+- First scene is "title". Second scene is usually "kinetic" (punchy hook words).
+- Use a variety of visual types; never the same type twice in a row. Aim for at least one "map"
+  when places matter, one "object3d" for physical/scientific/technical ideas, and a "kinetic" beat
+  every 5-6 scenes to reset attention.
+- "map": real coordinates only. "globe" for a global overview, "flat" for routes between places.
+  Route endpoints must match point labels exactly.
+- "object3d": choose the model that best symbolises the idea (atom = physics/chemistry,
+  planet = space/earth, dna = biology/genetics, crystal = materials/value/energy,
+  network = internet/AI/connections, cube = data/building blocks/systems).
 - On-screen text is short (max ~8 words per item) and complements, not repeats, the narration.
 - "stat" only for real, well-known figures. Do not invent statistics or quotes; if unsure, use another visual.
 - "barChart" values must be numbers that are correct or clearly illustrative (say so in narration).
 - Every "cue" must be 2-4 consecutive words copied EXACTLY from that scene's narration, in the same
   order the items are listed, so each item appears when the voice says it.
+
+Transitions (how each scene enters), edit like a pro: "cut" or "flash" on high-energy beats and
+kinetic scenes, "whip"/"slide" when moving on to the next point, "zoom" into a detail or big
+reveal, "glitch" for tech/surprise, "iris" or "lightLeak" for calm or emotional moments, "fade" sparingly.
+Vary them; avoid the same transition three times in a row.
 
 Pick the theme that fits the topic's mood.`;
 

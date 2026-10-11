@@ -17,4 +17,4 @@ export const THEMES: Record<ThemeName, Theme> = {
   forest: { bg1: "#0b1a12", bg2: "#173726", text: "#f2fff5", muted: "#a8cdb3", accent: "#7be495", accent2: "#f6d365", card: "rgba(255,255,255,0.06)" },
 };
 
-export const FONT = `"Inter", "Segoe UI", "Noto Sans", "Noto Sans Devanagari", "Noto Nastaliq Urdu", system-ui, sans-serif`;
+export { BODY_FONT as FONT, DISPLAY_FONT } from "./fonts";

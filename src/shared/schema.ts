@@ -77,6 +77,35 @@ export const QuoteVisual = z.object({
   author: z.string(),
 });
 
+export const KineticVisual = z.object({
+  type: z.literal("kinetic"),
+  lines: z
+    .array(CuedText)
+    .describe("2-5 punchy phrases (1-4 words each) that slam onto screen one after another; great for hooks"),
+});
+
+export const MapVisual = z.object({
+  type: z.literal("map"),
+  style: z.enum(["globe", "flat"]).describe("globe = rotating 3D earth; flat = zooming 2D world map"),
+  heading: z.string(),
+  highlight: z.array(z.string()).describe("English country names to colour in, e.g. [\"Japan\"]. Can be empty."),
+  points: z
+    .array(z.object({ label: z.string(), lat: z.number(), lon: z.number(), cue: z.string() }))
+    .describe("1-5 places with real coordinates; each pin drops when its cue is spoken"),
+  routes: z
+    .array(z.object({ from: z.string(), to: z.string() }))
+    .describe("Animated arcs between point labels, e.g. trade or travel routes. Can be empty."),
+});
+
+export const Object3DVisual = z.object({
+  type: z.literal("object3d"),
+  heading: z.string(),
+  model: z
+    .enum(["atom", "planet", "dna", "crystal", "network", "cube"])
+    .describe("The 3D hero object that best represents the idea"),
+  labels: z.array(CuedText).describe("0-4 callout labels that appear around the object"),
+});
+
 export const Visual = z.union([
   TitleVisual,
   BulletsVisual,
@@ -87,12 +116,18 @@ export const Visual = z.union([
   IconGridVisual,
   TimelineVisual,
   QuoteVisual,
+  KineticVisual,
+  MapVisual,
+  Object3DVisual,
 ]);
+
+export const Transition = z.enum(["cut", "fade", "slide", "zoom", "whip", "glitch", "flash", "iris", "lightLeak"]);
 
 export const Scene = z.object({
   id: z.string().describe('Stable id like "s01"'),
   narration: z.string().describe("Exactly what the voice-over says in this scene. 1-4 sentences."),
   visual: Visual,
+  transition: Transition.describe("How this scene enters. Vary them; use cut/flash for energy, fade for calm."),
 });
 
 export const ThemeName = z.enum(["midnight", "sunset", "ocean", "forest"]);
@@ -108,6 +143,7 @@ export type VideoPlan = z.infer<typeof VideoPlan>;
 export type Scene = z.infer<typeof Scene>;
 export type Visual = z.infer<typeof Visual>;
 export type ThemeName = z.infer<typeof ThemeName>;
+export type Transition = z.infer<typeof Transition>;
 
 // ---- Timing (produced by the TTS step) ----
 
@@ -119,7 +155,14 @@ export type TimedScene = Scene & {
   durationInFrames: number;
   words: WordTiming[];
   reveals: number[]; // frame (relative to scene start) at which each cued item appears
+  transitionFrames: number; // overlap with the previous scene (0 for the first scene and for cuts)
+  sfx: SfxCue[];
 };
+
+export type SfxName =
+  | "pop" | "click" | "tick" | "glitch" | "ding" | "thud" | "boom" | "shimmer" | "whoosh" | "whip" | "riser";
+
+export type SfxCue = { name: SfxName; frame: number; volume: number }; // frame relative to scene start
 
 export type RenderProps = {
   title: string;
@@ -127,4 +170,6 @@ export type RenderProps = {
   fps: number;
   scenes: TimedScene[];
   showCaptions: boolean;
+  /** Background music file in the job's public dir, or null for none. */
+  music: string | null;
 };

@@ -1,5 +1,6 @@
 import { useCurrentFrame } from "remotion";
 import { progress, useEnter, useRise } from "../anim";
+import { DISPLAY_FONT } from "../fonts";
 import type { SceneProps } from "./types";
 
 // Counts the leading number up ("73%" -> 0..73%), keeping prefix/suffix intact.
@@ -21,7 +22,7 @@ export const StatScene: React.FC<SceneProps<"stat">> = ({ visual, theme }) => {
     <div style={{ textAlign: "center" }}>
       <div
         style={{
-          fontSize: 260, fontWeight: 900, letterSpacing: -6, lineHeight: 1,
+          fontFamily: DISPLAY_FONT, fontSize: 280, fontWeight: 900, letterSpacing: -8, lineHeight: 1,
           backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.accent2})`,
           backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent",
           opacity: pop, scale: String(0.6 + 0.4 * pop),
@@ -29,7 +30,7 @@ export const StatScene: React.FC<SceneProps<"stat">> = ({ visual, theme }) => {
       >
         {countUp(visual.value, progress(frame, 0, 45))}
       </div>
-      <div style={{ ...label, fontSize: 64, fontWeight: 700, color: theme.text, marginTop: 24 }}>{visual.label}</div>
+      <div style={{ ...label, fontFamily: DISPLAY_FONT, fontSize: 64, fontWeight: 800, color: theme.text, marginTop: 24 }}>{visual.label}</div>
       <div style={{ ...ctx, fontSize: 40, color: theme.muted, marginTop: 20, maxWidth: 1300 }}>{visual.context}</div>
     </div>
   );

@@ -9,6 +9,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { VideoPlan, type RenderProps } from "../shared/schema";
+import { sceneStarts } from "../shared/timing";
+import { prepareMusic } from "./music";
 import { renderVideo } from "./render";
 import { writeScript } from "./script";
 import { getTts } from "./tts";
@@ -25,6 +27,7 @@ const { values, positionals } = parseArgs({
     "job-dir": { type: "string" },
     fps: { type: "string", default: "30" },
     "no-captions": { type: "boolean", default: false },
+    music: { type: "string", default: "auto" },
     "skip-render": { type: "boolean", default: false },
     help: { type: "boolean", short: "h", default: false },
   },
@@ -45,6 +48,7 @@ Options:
   --job-dir <dir>    Where to write the job (default jobs/<timestamp>-<title>)
   --fps <n>          Frames per second (default 30)
   --no-captions      Hide burned-in captions
+  --music <file>     Background music file, "auto" (generated pad, default) or "none"
   --skip-render      Stop after voice-over (preview in Remotion Studio instead)`);
   process.exit(prompt || values.plan ? 0 : 1);
 }
@@ -79,15 +83,19 @@ async function main() {
   });
   process.stdout.write("\n");
 
+  const total = sceneStarts(scenes).total / fps;
+  await fs.cp(path.resolve("assets/sfx"), path.join(jobDir, "sfx"), { recursive: true });
+  const music = await prepareMusic(jobDir, total, values.music!);
+
   const props: RenderProps = {
     title: plan.title,
     theme: plan.theme,
     fps,
     scenes,
     showCaptions: !values["no-captions"],
+    music,
   };
   await fs.writeFile(path.join(jobDir, "props.json"), JSON.stringify(props, null, 2));
-  const total = scenes.reduce((s, sc) => s + sc.durationInFrames, 0) / fps;
   console.log(`   Total length: ${Math.floor(total / 60)}m ${Math.round(total % 60)}s`);
 
   const rel = path.relative(process.cwd(), jobDir);

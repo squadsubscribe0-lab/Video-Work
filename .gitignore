@@ -2,5 +2,6 @@ node_modules/
 jobs/
 out/
 .env
-# Remotion's agent skills are fetched by scripts/install-remotion-skills.sh (Remotion License)
+# Skills fetched by scripts/install-skills.sh (Remotion License / unlicensed upstream)
 .claude/skills/remotion-*/
+.claude/skills/motion-designer/

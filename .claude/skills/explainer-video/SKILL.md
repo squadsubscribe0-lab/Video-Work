@@ -42,6 +42,17 @@ but needs internet; `--tts elevenlabs` needs `ELEVENLABS_API_KEY`.
 - Animate only with `useCurrentFrame()` / `interpolate()` / `spring()`; CSS transitions don't render.
 - Never hard-code seconds in scenes: use `reveals[i]` (frames) and `useVideoConfig().fps`.
 
+## Transitions, sound and camera
+
+- Each scene has a `transition` (how it enters). Overlap lengths live in `TRANSITION_FRAMES`
+  (`src/shared/timing.ts`); `cut`/`flash`/`lightLeak` don't overlap and are drawn by `EntryOverlay`.
+  Visuals live in `src/remotion/transitions.tsx`.
+- Sound effects are chosen by `sfxFor()` in `src/shared/sfx.ts` (transition sound at frame 0, a sound per
+  reveal, riser+boom for stats, ding on the finale). Files are in `assets/sfx/` and copied into each job.
+- Music: `src/pipeline/music.ts` (generated pad or `--music file`), ducked under the voice in `Explainer.tsx`.
+- Camera/lens: `src/remotion/components/Cinematic.tsx` (push-in, punch on reveals, letterbox, grain, vignette).
+- 3D scenes use `@remotion/three`: animate only from `useCurrentFrame()`, never `useFrame()`.
+
 ## Adding a new scene type
 
 1. Add a zod schema to `src/shared/schema.ts` and include it in the `Visual` union.
@@ -52,6 +63,6 @@ but needs internet; `--tts elevenlabs` needs `ELEVENLABS_API_KEY`.
 
 ## Related skills in this repo
 
-- `remotion-*` (run `npm run skills:remotion` if missing): Remotion API best practices. Load `remotion-best-practices` before writing Remotion code.
+- `remotion-*` and `motion-designer` etc. (run `npm run skills:install` if missing): Remotion API rules and motion-design guidance. Load `remotion-best-practices` before writing Remotion code; `motion-designer` when planning how a scene should move and sound.
 - `visual-storyteller`, `animation-composer`, `motion-graphics`: narrative structure, pacing and kinetic-typography ideas (the examples are Manim; they inform the script prompt and scene design).
 - `manim-composer`, `manimce-best-practices`, `math-visualizer`, `manim-skill`: for a future Manim renderer for maths-heavy scenes (see `docs/ROADMAP.md`).

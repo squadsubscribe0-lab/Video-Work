@@ -1,7 +1,8 @@
 import { Composition } from "remotion";
 import demoPlan from "../../examples/demo-plan.json";
 import { VideoPlan, type RenderProps } from "../shared/schema";
-import { computeReveals, cuesOf, estimateWordTimings, sceneFrames } from "../shared/timing";
+import { sfxFor } from "../shared/sfx";
+import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, sceneStarts, TRANSITION_FRAMES } from "../shared/timing";
 import { Explainer } from "./Explainer";
 
 // Studio default: the demo plan with estimated timings and no audio, so the
@@ -14,16 +15,20 @@ const preview: RenderProps = (() => {
     theme: plan.theme,
     fps: FPS,
     showCaptions: true,
-    scenes: plan.scenes.map((s) => {
+    music: null,
+    scenes: plan.scenes.map((s, i) => {
       const duration = Math.max(1.5, s.narration.split(/\s+/).length / 2.5);
       const words = estimateWordTimings(s.narration, duration);
+      const reveals = computeReveals(cuesOf(s.visual), words, duration, FPS);
       return {
         ...s,
         audioFile: "",
         audioDuration: duration,
         durationInFrames: sceneFrames(duration, FPS),
         words,
-        reveals: computeReveals(cuesOf(s.visual), words, duration, FPS),
+        reveals,
+        transitionFrames: i === 0 ? 0 : TRANSITION_FRAMES[s.transition],
+        sfx: sfxFor(s.visual, s.transition, reveals, { isFirst: i === 0, isLast: i === plan.scenes.length - 1 }),
       };
     }),
   };
@@ -40,7 +45,7 @@ export const Root: React.FC = () => (
     defaultProps={preview}
     calculateMetadata={({ props }) => ({
       fps: props.fps,
-      durationInFrames: Math.max(1, props.scenes.reduce((sum, s) => sum + s.durationInFrames, 0)),
+      durationInFrames: sceneStarts(props.scenes).total,
     })}
   />
 );

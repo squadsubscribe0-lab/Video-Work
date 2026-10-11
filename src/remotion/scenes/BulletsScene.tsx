@@ -1,15 +1,22 @@
-import { useRise } from "../anim";
+import { useEnter } from "../anim";
 import { Heading } from "../components/Heading";
 import type { Theme } from "../theme";
 import type { SceneProps } from "./types";
 
 const Bullet: React.FC<{ text: string; at: number; index: number; theme: Theme }> = ({ text, at, index, theme }) => {
-  const rise = useRise(at, 50);
+  const p = useEnter(at);
   return (
-    <div style={{ ...rise, display: "flex", alignItems: "center", gap: 32, marginBottom: 34 }}>
+    <div
+      style={{
+        opacity: p, translate: `${(1 - p) * -120}px 0px`, filter: `blur(${(1 - p) * 12}px)`,
+        display: "flex", alignItems: "center", gap: 32, marginBottom: 30, padding: "14px 28px 14px 14px",
+        borderRadius: 22, background: `linear-gradient(90deg, ${theme.card}, transparent)`,
+        borderLeft: `4px solid ${index % 2 ? theme.accent2 : theme.accent}`,
+      }}
+    >
       <div
         style={{
-          width: 64, height: 64, borderRadius: 18, flexShrink: 0,
+          width: 64, height: 64, borderRadius: 18, flexShrink: 0, scale: String(0.4 + 0.6 * p), rotate: `${(1 - p) * -90}deg`,
           background: index % 2 ? theme.accent2 : theme.accent,
           color: theme.bg1, fontSize: 34, fontWeight: 800,
           display: "flex", alignItems: "center", justifyContent: "center",

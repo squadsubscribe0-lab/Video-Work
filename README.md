@@ -1,7 +1,8 @@
 # Video-Work: prompt → YouTube explainer video
 
-Give it a topic. It writes the script, records the voice-over, animates motion-graphics
-scenes, syncs everything to the voice word by word, and renders an MP4.
+Give it a topic. It writes the script, records the voice-over, animates motion-graphics,
+map and 3D scenes, cuts them together with cinematic transitions, lays sound effects and
+a music bed under it, syncs everything to the voice word by word, and renders an MP4.
 
 ```bash
 npm install
@@ -48,6 +49,7 @@ npm run make -- "<topic>" --minutes 5 --language ur-PK     # Urdu narration
 npm run make -- "<topic>" --tts elevenlabs --voice <id>    # needs ELEVENLABS_API_KEY
 npm run make -- --plan jobs/<id>/plan.json                 # re-render after editing the script
 npm run make -- --plan examples/demo-plan.json --tts mock  # offline test (silent audio)
+npm run make -- "<topic>" --music my-track.mp3            # your own music (or --music none)
 npm run make -- "<topic>" --skip-render                    # then preview in Remotion Studio
 npm run studio                                             # Studio with the demo plan
 ```
@@ -58,11 +60,18 @@ npm run studio                                             # Studio with the dem
 | `ELEVENLABS_API_KEY` | `--tts elevenlabs` |
 | `SCRIPT_MODEL` | Override the Claude model (default `claude-opus-5-5`) |
 | `REMOTION_BROWSER_EXECUTABLE` | Use an existing Chrome/Chromium instead of Remotion's download |
+| `REMOTION_GL` | WebGL backend for 3D: `swangle` (default, works on CI) or `angle` (GPU) |
 
-## Scene types
+## What's in a video
 
-`title` · `bullets` · `stat` (count-up number) · `comparison` · `process` (steps with a drawing connector) ·
-`barChart` · `iconGrid` · `timeline` · `quote` (typewriter)
+| Layer | What it does |
+|---|---|
+| **12 scene types** | `title` (trailer-style) · `kinetic` (slamming typography) · `map` (rotating globe or zooming flat map with pins and animated routes) · `object3d` (Three.js atom, planet, DNA, crystal, network, cube) · `stat` (count-up) · `bullets` · `comparison` · `process` · `barChart` · `iconGrid` · `timeline` · `quote` |
+| **Transitions** | `cut` · `flash` · `whip` (whip-pan with blur) · `zoom` (push cut) · `glitch` (RGB split) · `slide` · `iris` · `lightLeak` · `fade`, picked per scene by the script writer |
+| **Camera** | Slow push-in, handheld drift and a punch-zoom on every reveal; letterbox bars on title/kinetic/quote beats |
+| **Lens** | Film grain, vignette, living background (particles, perspective grid, light blobs, pulse rings) |
+| **Sound** | Whoosh/whip/glitch on transitions, pops/ticks on reveals, riser + boom on big numbers, ding on the finale (`assets/sfx`, CC0) |
+| **Music** | Generated ambient pad (or `--music your-track.mp3`), automatically ducked under the voice |
 
 Items in a scene carry a `cue`: words copied from the narration. The item appears on the exact frame the
 voice says them. To add a scene type, follow `.claude/skills/explainer-video/SKILL.md`.
@@ -72,7 +81,7 @@ voice says them. To add a scene type, follow `.claude/skills/explainer-video/SKI
 ```bash
 npm run typecheck
 npm test
-npm run skills:remotion   # fetch Remotion's official agent skills into .claude/skills/
+npm run skills:install   # fetch Remotion + motion-design agent skills into .claude/skills/
 ```
 
 ## Licensing note
