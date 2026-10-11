@@ -1,0 +1,36 @@
+import { useCurrentFrame } from "remotion";
+import { progress, useEnter, useRise } from "../anim";
+import type { SceneProps } from "./types";
+
+// Counts the leading number up ("73%" -> 0..73%), keeping prefix/suffix intact.
+function countUp(value: string, p: number): string {
+  const m = value.match(/^([^\d-]*)(-?[\d,]*\.?\d+)(.*)$/);
+  if (!m) return value;
+  const target = parseFloat(m[2].replace(/,/g, ""));
+  const decimals = (m[2].split(".")[1] ?? "").length;
+  const n = (target * p).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return `${m[1]}${n}${m[3]}`;
+}
+
+export const StatScene: React.FC<SceneProps<"stat">> = ({ visual, theme }) => {
+  const frame = useCurrentFrame();
+  const pop = useEnter(0);
+  const label = useRise(14);
+  const ctx = useRise(26);
+  return (
+    <div style={{ textAlign: "center" }}>
+      <div
+        style={{
+          fontSize: 260, fontWeight: 900, letterSpacing: -6, lineHeight: 1,
+          backgroundImage: `linear-gradient(90deg, ${theme.accent}, ${theme.accent2})`,
+          backgroundClip: "text", WebkitBackgroundClip: "text", color: "transparent",
+          opacity: pop, scale: String(0.6 + 0.4 * pop),
+        }}
+      >
+        {countUp(visual.value, progress(frame, 0, 45))}
+      </div>
+      <div style={{ ...label, fontSize: 64, fontWeight: 700, color: theme.text, marginTop: 24 }}>{visual.label}</div>
+      <div style={{ ...ctx, fontSize: 40, color: theme.muted, marginTop: 20, maxWidth: 1300 }}>{visual.context}</div>
+    </div>
+  );
+};

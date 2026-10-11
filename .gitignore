@@ -1,0 +1,6 @@
+node_modules/
+jobs/
+out/
+.env
+# Remotion's agent skills are fetched by scripts/install-remotion-skills.sh (Remotion License)
+.claude/skills/remotion-*/

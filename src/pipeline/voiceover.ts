@@ -1,0 +1,58 @@
+// Step 2: narration -> audio + word timings, then everything is timed off the audio
+// (the audio is the master clock, so visuals and captions can never drift).
+import path from "node:path";
+import type { TimedScene, VideoPlan } from "../shared/schema";
+import { computeReveals, cuesOf, estimateWordTimings, sceneFrames } from "../shared/timing";
+import { audioDuration } from "./media";
+import type { TtsProvider } from "./tts";
+
+async function withRetry<T>(fn: () => Promise<T>, tries = 3): Promise<T> {
+  for (let i = 1; ; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i >= tries) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i));
+    }
+  }
+}
+
+/** Runs `fn` over `items` with at most `limit` in flight, preserving order. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, i: number) => Promise<R>): Promise<R[]> {
+  const out: R[] = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      out[i] = await fn(items[i], i);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return out;
+}
+
+export async function voiceOver(
+  plan: VideoPlan,
+  jobDir: string,
+  tts: TtsProvider,
+  opts: { fps: number; voice?: string; onProgress?: (done: number, total: number) => void },
+): Promise<TimedScene[]> {
+  let done = 0;
+  return mapLimit(plan.scenes, 4, async (scene, i) => {
+    const base = path.join(jobDir, `scene-${String(i + 1).padStart(2, "0")}`);
+    const res = await withRetry(() =>
+      tts.synthesize(scene.narration, base, { language: plan.language, voice: opts.voice }),
+    );
+    const duration = await audioDuration(res.audioPath);
+    const words = res.words ?? estimateWordTimings(scene.narration, duration);
+    opts.onProgress?.(++done, plan.scenes.length);
+    return {
+      ...scene,
+      audioFile: path.basename(res.audioPath),
+      audioDuration: duration,
+      durationInFrames: sceneFrames(duration, opts.fps),
+      words,
+      reveals: computeReveals(cuesOf(scene.visual), words, duration, opts.fps),
+    };
+  });
+}

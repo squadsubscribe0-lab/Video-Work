@@ -1,0 +1,32 @@
+{
+  "name": "video-work",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prompt -> fully synced YouTube explainer video (script, voice-over, motion graphics, captions).",
+  "scripts": {
+    "make": "tsx src/pipeline/cli.ts",
+    "studio": "remotion studio src/remotion/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.test.ts",
+    "skills:remotion": "bash scripts/install-remotion-skills.sh"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@remotion/bundler": "4.0.534",
+    "@remotion/cli": "4.0.534",
+    "@remotion/media": "4.0.534",
+    "@remotion/renderer": "4.0.534",
+    "msedge-tts": "^2.0.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "4.0.534",
+    "zod": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}
