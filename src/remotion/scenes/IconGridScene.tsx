@@ -20,7 +20,7 @@ const Tile: React.FC<{ emoji: string; label: string; at: number; theme: Theme }>
 
 export const IconGridScene: React.FC<SceneProps<"iconGrid">> = ({ visual, reveals, theme }) => (
   <div style={{ width: 1500, textAlign: "center" }}>
-    <Heading text={visual.heading} theme={theme} />
+    <Heading text={visual.heading} theme={theme} center />
     <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "center" }}>
       {visual.items.slice(0, 6).map((it, i) => (
         <Tile key={i} emoji={it.emoji} label={it.label} at={reveals[i] ?? 0} theme={theme} />
