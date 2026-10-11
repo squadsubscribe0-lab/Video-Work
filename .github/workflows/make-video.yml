@@ -1,0 +1,124 @@
+name: Make video
+
+# Two ways to order a video:
+#  1. Actions tab -> "Make video" -> Run workflow, and type the prompt.
+#  2. Add or edit a file in requests/*.json and push (see requests/README.md).
+# The finished MP4 is attached to the run under "Artifacts".
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Topic / brief for the video"
+        required: true
+      minutes:
+        description: "Target length in minutes"
+        default: "2"
+      language:
+        description: "Narration language (en-US, hi-IN, ur-PK, ...)"
+        default: "en-US"
+      tts:
+        description: "Voice engine"
+        type: choice
+        options: [edge, elevenlabs, mock]
+        default: edge
+  push:
+    paths:
+      - "requests/*.json"
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      requests: ${{ steps.list.outputs.requests }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: list
+        name: Find requests to render
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          PROMPT: ${{ inputs.prompt }}
+          MINUTES: ${{ inputs.minutes }}
+          LANGUAGE: ${{ inputs.language }}
+          TTS: ${{ inputs.tts }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            # The form becomes a one-off request, passed to the render job as JSON.
+            req=$(jq -cn --arg p "$PROMPT" --arg m "$MINUTES" --arg l "$LANGUAGE" --arg t "$TTS" \
+              '{prompt:$p, minutes:($m|tonumber), language:$l, tts:$t}')
+            echo "requests=$(jq -cn --argjson r "$req" '[{name:"manual", inline:$r}]')" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            files=$(git diff-tree --no-commit-id --name-only --diff-filter=AM -r "$AFTER" -- 'requests/*.json')
+          else
+            files=$(git diff --name-only --diff-filter=AM "$BEFORE" "$AFTER" -- 'requests/*.json')
+          fi
+          echo "Requests: $files"
+          echo "requests=$(printf '%s\n' $files | jq -R 'select(length>0) | {name: (split("/")[-1] | rtrimstr(".json")), file: .}' | jq -cs .)" >> "$GITHUB_OUTPUT"
+
+  render:
+    needs: plan
+    if: needs.plan.outputs.requests != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        request: ${{ fromJson(needs.plan.outputs.requests) }}
+    name: render (${{ matrix.request.name }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install fonts (emoji, Devanagari, Arabic/Urdu)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-core fonts-noto-color-emoji fonts-noto-ui-core >/dev/null
+      - run: npm ci --no-fund --no-audit
+      - name: Prepare headless browser
+        run: npx remotion browser ensure
+      - name: Make the video
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          REQUEST_FILE: ${{ matrix.request.file }}
+          REQUEST_INLINE: ${{ toJson(matrix.request.inline) }}
+          NAME: ${{ matrix.request.name }}
+        run: |
+          if [ -z "$REQUEST_FILE" ]; then
+            REQUEST_FILE="$RUNNER_TEMP/request.json"
+            printf '%s' "$REQUEST_INLINE" > "$REQUEST_FILE"
+          fi
+          npx tsx src/pipeline/request.ts "$REQUEST_FILE" "jobs/$NAME"
+      - name: Summary
+        if: always()
+        env:
+          NAME: ${{ matrix.request.name }}
+        run: |
+          if [ -f "jobs/$NAME/video.mp4" ]; then
+            title=$(jq -r .title "jobs/$NAME/plan.json")
+            secs=$(jq '[.scenes[].durationInFrames] | add / 30 | floor' "jobs/$NAME/props.json")
+            echo "### ✅ $title ($((secs / 60))m $((secs % 60))s)" >> "$GITHUB_STEP_SUMMARY"
+            echo "Download it from **Artifacts** below: \`video-$NAME\`." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### ❌ No video was produced for \`$NAME\` - see the logs above." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: video-${{ matrix.request.name }}
+          path: |
+            jobs/${{ matrix.request.name }}/video.mp4
+            jobs/${{ matrix.request.name }}/plan.json
+          if-no-files-found: ignore
+          retention-days: 30

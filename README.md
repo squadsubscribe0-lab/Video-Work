@@ -10,6 +10,14 @@ npm run make -- "Why do we dream?" --minutes 3
 # ✅ Done: jobs/20261011-why-do-we-dream/video.mp4
 ```
 
+## Run it on GitHub (no setup on your computer)
+
+1. Repo **Settings → Secrets and variables → Actions → New repository secret**:
+   `ANTHROPIC_API_KEY` (and optionally `ELEVENLABS_API_KEY`).
+2. **Actions → Make video → Run workflow**, type the topic, press Run.
+   Or commit a file to `requests/` (see [requests/README.md](requests/README.md)), which also works from the GitHub mobile app.
+3. When the run finishes, download the MP4 from the run's **Artifacts** section.
+
 ## How it works
 
 ```
@@ -77,6 +85,11 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for what comes next (AI images, music, Ma
 ---
 
 ### Roman Urdu: jaldi shuru karein
+
+**GitHub par (aapke computer ki zarurat nahi):** Settings → Secrets mein `ANTHROPIC_API_KEY` daalein, phir
+Actions → "Make video" → Run workflow mein topic likhein. Video run ke **Artifacts** mein milegi.
+
+**Apne computer par:**
 
 1. `npm install`
 2. `export ANTHROPIC_API_KEY=...`

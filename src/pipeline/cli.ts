@@ -22,6 +22,7 @@ const { values, positionals } = parseArgs({
     tts: { type: "string", default: "edge" },
     voice: { type: "string" },
     plan: { type: "string" },
+    "job-dir": { type: "string" },
     fps: { type: "string", default: "30" },
     "no-captions": { type: "boolean", default: false },
     "skip-render": { type: "boolean", default: false },
@@ -41,6 +42,7 @@ Options:
   --tts <name>       edge (free, default) | elevenlabs | mock (silent, offline)
   --voice <id>       Voice name/id for the TTS provider
   --plan <file>      Skip script writing and use an existing plan.json
+  --job-dir <dir>    Where to write the job (default jobs/<timestamp>-<title>)
   --fps <n>          Frames per second (default 30)
   --no-captions      Hide burned-in captions
   --skip-render      Stop after voice-over (preview in Remotion Studio instead)`);
@@ -65,7 +67,7 @@ async function main() {
   }
 
   const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
-  const jobDir = path.resolve("jobs", `${stamp}-${slug(plan.title)}`);
+  const jobDir = path.resolve(values["job-dir"] ?? path.join("jobs", `${stamp}-${slug(plan.title)}`));
   await fs.mkdir(jobDir, { recursive: true });
   await fs.writeFile(path.join(jobDir, "plan.json"), JSON.stringify(plan, null, 2));
 
