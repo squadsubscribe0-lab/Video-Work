@@ -85,7 +85,11 @@ async function main() {
 
   const total = sceneStarts(scenes).total / fps;
   await fs.cp(path.resolve("assets/sfx"), path.join(jobDir, "sfx"), { recursive: true });
-  const music = await prepareMusic(jobDir, total, values.music!);
+  // Music is a nice-to-have: if it can't be made, render without it.
+  const music = await prepareMusic(jobDir, total, values.music!).catch((err: Error) => {
+    console.warn(`⚠️  No background music: ${err.message.split("\n").pop()}`);
+    return null;
+  });
 
   const props: RenderProps = {
     title: plan.title,

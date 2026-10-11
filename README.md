@@ -4,6 +4,8 @@ Give it a topic. It writes the script, records the voice-over, animates motion-g
 map and 3D scenes, cuts them together with cinematic transitions, lays sound effects and
 a music bed under it, syncs everything to the voice word by word, and renders an MP4.
 
+Needs Node 22+ and ffmpeg (`brew install ffmpeg` / `sudo apt install ffmpeg`).
+
 ```bash
 npm install
 export ANTHROPIC_API_KEY=sk-ant-...
