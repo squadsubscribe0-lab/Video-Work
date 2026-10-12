@@ -7,8 +7,11 @@ import { estimateWordTimings } from "../../shared/timing";
 import type { WordTiming } from "../../shared/schema";
 import type { TtsProvider } from "./types";
 
-type Chunk = { text: string; audio: { audio: Float32Array; sampling_rate: number } };
-type Kokoro = { stream(text: string, opts: { voice: string }): AsyncIterable<Chunk> };
+type RawAudio = { audio: Float32Array; sampling_rate: number };
+type Kokoro = { generate(text: string, opts: { voice: string }): Promise<RawAudio> };
+
+/** Sentences, so each generate() call stays well under Kokoro's 510-token input limit. */
+export const sentences = (text: string) => text.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g)?.map((s) => s.trim()).filter(Boolean) ?? [];
 
 let model: Promise<Kokoro> | null = null;
 function load(): Promise<Kokoro> {
@@ -52,11 +55,13 @@ export const kokoroTts: TtsProvider = {
     let rate = 24000;
     let t = 0;
     // Sentence by sentence: exact sentence boundaries anchor the estimated word timings.
-    for await (const chunk of tts.stream(text, { voice: voice ?? "am_michael" })) {
-      rate = chunk.audio.sampling_rate;
-      const dur = chunk.audio.audio.length / rate;
-      for (const w of estimateWordTimings(chunk.text, dur)) words.push({ ...w, start: w.start + t, end: w.end + t });
-      parts.push(chunk.audio.audio);
+    // (kokoro-js's stream() never closes its splitter, so it hangs on the last sentence.)
+    for (const sentence of sentences(text)) {
+      const out = await tts.generate(sentence, { voice: voice ?? "am_michael" });
+      rate = out.sampling_rate;
+      const dur = out.audio.length / rate;
+      for (const w of estimateWordTimings(sentence, dur)) words.push({ ...w, start: w.start + t, end: w.end + t });
+      parts.push(out.audio);
       t += dur;
     }
     const all = new Float32Array(parts.reduce((n, p) => n + p.length, 0));

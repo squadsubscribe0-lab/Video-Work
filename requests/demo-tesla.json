@@ -2,5 +2,6 @@
   "plan": "examples/demo-plan.json",
   "tts": "edge",
   "voice": "en-US-AndrewMultilingualNeural",
-  "captions": "bold"
+  "captions": "bold",
+  "minutes": 2
 }

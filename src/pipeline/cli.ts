@@ -125,7 +125,17 @@ async function main() {
   console.log(`✅ Done: ${path.relative(process.cwd(), out)}`);
 }
 
-main().catch((err) => {
+// If a promise never settles, Node exits with code 0 once the event loop is empty;
+// treat that as a failure so CI doesn't report a video that was never made.
+let finished = false;
+process.on("beforeExit", () => {
+  if (!finished) {
+    console.error("\n❌ Pipeline stopped before finishing (a step never completed)");
+    process.exit(1);
+  }
+});
+
+main().then(() => (finished = true)).catch((err) => {
   console.error(`\n❌ ${err instanceof Error ? err.message : err}`);
   process.exit(1);
 });
