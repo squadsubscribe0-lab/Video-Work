@@ -1,163 +1,148 @@
 {
-  "title": "How the Internet Actually Works",
+  "title": "The Man Who Lit the World",
   "language": "en-US",
-  "theme": "ocean",
+  "theme": "sunset",
+  "grade": "warmFilm",
   "scenes": [
     {
       "id": "s01",
-      "narration": "Every time you open a website, your request crosses oceans and comes back in less than a second. How is that even possible?",
-      "visual": { "type": "title", "heading": "How the Internet Actually Works", "subheading": "From your click to the world, and back" },
+      "narration": "Every light in your home runs on an idea from one man. Most people still don't know his story.",
+      "visual": { "type": "title", "heading": "The Man Who Lit the World", "subheading": "The story of Nikola Tesla" },
       "transition": "fade"
     },
     {
       "id": "s02",
-      "narration": "One click. Thousands of kilometres. A fraction of a second.",
+      "narration": "He gave us alternating current. He dreamed of wireless power. And he died almost forgotten.",
       "visual": {
         "type": "kinetic",
         "lines": [
-          { "text": "One click", "cue": "One click" },
-          { "text": "Thousands of km", "cue": "Thousands of kilometres" },
-          { "text": "A fraction of a second", "cue": "fraction of a" }
+          { "text": "Alternating current", "cue": "gave us alternating" },
+          { "text": "Wireless power", "cue": "of wireless power" },
+          { "text": "Almost forgotten", "cue": "died almost forgotten" }
         ]
       },
       "transition": "flash"
     },
     {
       "id": "s03",
-      "narration": "Over ninety five percent of data between continents doesn't fly through space. It travels through cables lying on the ocean floor.",
-      "visual": { "type": "stat", "value": "95%", "label": "of intercontinental data", "context": "travels through undersea fibre-optic cables" },
-      "transition": "zoom"
+      "narration": "Nikola Tesla was born in eighteen fifty six in Smiljan, in today's Croatia. He spoke several languages, and over his life he held around three hundred patents.",
+      "visual": {
+        "type": "dossier",
+        "name": "Nikola Tesla",
+        "image": "Nikola Tesla",
+        "role": "Inventor, 1856-1943",
+        "facts": [
+          { "text": "Born 1856, Smiljan", "cue": "born in eighteen" },
+          { "text": "Spoke several languages", "cue": "spoke several languages" },
+          { "text": "Around 300 patents", "cue": "around three hundred" }
+        ],
+        "stamp": "Genius"
+      },
+      "transition": "paperTear"
     },
     {
       "id": "s04",
-      "narration": "A request from New York can race under the Atlantic to London, on to Mumbai, and all the way to Singapore.",
+      "narration": "In eighteen eighty four he left Europe and sailed to New York with almost nothing.",
       "visual": {
         "type": "map",
         "style": "flat",
-        "heading": "Under the sea",
-        "highlight": [],
+        "heading": "1884: a new life",
+        "highlight": ["Croatia", "United States of America"],
         "points": [
-          { "label": "New York", "lat": 40.71, "lon": -74.0, "cue": "from New York" },
-          { "label": "London", "lat": 51.51, "lon": -0.13, "cue": "to London" },
-          { "label": "Mumbai", "lat": 19.08, "lon": 72.88, "cue": "to Mumbai" },
-          { "label": "Singapore", "lat": 1.35, "lon": 103.82, "cue": "to Singapore" }
+          { "label": "Smiljan", "lat": 44.57, "lon": 15.32, "cue": "he left Europe" },
+          { "label": "New York", "lat": 40.71, "lon": -74.0, "cue": "to New York" }
         ],
-        "routes": [
-          { "from": "New York", "to": "London" },
-          { "from": "London", "to": "Mumbai" },
-          { "from": "Mumbai", "to": "Singapore" }
-        ]
+        "routes": [{ "from": "Smiljan", "to": "New York" }]
       },
       "transition": "whip"
     },
     {
       "id": "s05",
-      "narration": "When you type an address, four things happen. Your device asks DNS for the server's number. It opens a connection. It sends the request. And the server sends back the page.",
+      "narration": "He briefly worked for Thomas Edison, who backed direct current. But Tesla's alternating current could travel much farther, and George Westinghouse bet his company on it.",
       "visual": {
-        "type": "process",
-        "heading": "One click, four steps",
-        "steps": [
-          { "text": "DNS lookup", "cue": "asks DNS for" },
-          { "text": "Open a connection", "cue": "opens a connection" },
-          { "text": "Send the request", "cue": "sends the request" },
-          { "text": "Page comes back", "cue": "server sends back" }
+        "type": "evidenceBoard",
+        "heading": "The War of the Currents",
+        "items": [
+          { "image": "Thomas Edison", "label": "Edison", "cue": "for Thomas Edison" },
+          { "image": "Nikola Tesla", "label": "Tesla", "cue": "Tesla's alternating current" },
+          { "image": "George Westinghouse", "label": "Westinghouse", "cue": "George Westinghouse bet" }
         ]
       },
-      "transition": "slide"
+      "transition": "shake"
     },
     {
       "id": "s06",
-      "narration": "Your data is chopped into small packets. Each one hops between routers, and they are put back together at the other end.",
+      "narration": "The idea was simple. Alternating current could be sent much farther, so one power plant could light a whole city.",
+      "visual": {
+        "type": "focusText",
+        "text": "AC could be sent much farther and light a whole city.",
+        "focus": [
+          { "text": "much farther", "cue": "sent much farther" },
+          { "text": "a whole city", "cue": "a whole city" }
+        ]
+      },
+      "transition": "zoom"
+    },
+    {
+      "id": "s07",
+      "narration": "In eighteen ninety five, a power plant at Niagara Falls began making electricity with his alternating current system.",
+      "visual": {
+        "type": "photo",
+        "image": "Niagara Falls",
+        "caption": "Niagara Falls · 1895",
+        "labels": [
+          { "text": "Hydroelectric power", "cue": "power plant at" },
+          { "text": "Tesla's AC system", "cue": "alternating current system" }
+        ]
+      },
+      "transition": "split"
+    },
+    {
+      "id": "s08",
+      "narration": "His biggest dream was wireless power for the whole planet. It ended when the money for his Wardenclyffe Tower ran out.",
       "visual": {
         "type": "object3d",
-        "heading": "A mesh of routers",
-        "model": "network",
+        "heading": "Wireless power for everyone",
+        "model": "planet",
         "labels": [
-          { "text": "Small packets", "cue": "into small packets" },
-          { "text": "Router hops", "cue": "hops between routers" },
-          { "text": "Reassembled", "cue": "put back together" }
+          { "text": "Wireless power", "cue": "was wireless power" },
+          { "text": "Wardenclyffe Tower", "cue": "his Wardenclyffe Tower" }
         ]
       },
       "transition": "glitch"
     },
     {
-      "id": "s07",
-      "narration": "Old phone networks reserved one line for the whole call. The internet shares every line between everyone.",
-      "visual": {
-        "type": "comparison",
-        "heading": "Two ways to send data",
-        "leftTitle": "Phone network",
-        "leftPoints": [{ "text": "One reserved line per call", "cue": "reserved one line" }],
-        "rightTitle": "The internet",
-        "rightPoints": [{ "text": "Every line is shared", "cue": "shares every line" }]
-      },
-      "transition": "iris"
-    },
-    {
-      "id": "s08",
-      "narration": "Distance still matters. As a rough illustration, a server in your city might answer in ten milliseconds, one across the country in fifty, and one on another continent in about one hundred and fifty.",
-      "visual": {
-        "type": "barChart",
-        "heading": "Distance adds delay (illustrative)",
-        "unit": " ms",
-        "bars": [
-          { "label": "Same city", "value": 10, "cue": "in your city" },
-          { "label": "Across country", "value": 50, "cue": "across the country" },
-          { "label": "Other continent", "value": 150, "cue": "on another continent" }
-        ]
-      },
-      "transition": "slide"
-    },
-    {
       "id": "s09",
-      "narration": "The websites themselves live in giant data centres, clustered in places like Northern Virginia, Dublin and Singapore.",
+      "narration": "He died in New York in nineteen forty three, aged eighty six, alone in a hotel room.",
       "visual": {
-        "type": "map",
-        "style": "globe",
-        "heading": "Where websites live",
-        "highlight": ["United States of America", "Ireland", "Singapore"],
-        "points": [
-          { "label": "N. Virginia", "lat": 39.04, "lon": -77.49, "cue": "like Northern Virginia" },
-          { "label": "Dublin", "lat": 53.35, "lon": -6.26, "cue": "Dublin and" },
-          { "label": "Singapore", "lat": 1.35, "lon": 103.82, "cue": "and Singapore" }
-        ],
-        "routes": []
+        "type": "newspaper",
+        "outlet": "The Evening Ledger",
+        "date": "January 8, 1943",
+        "headline": "Nikola Tesla, Famed Inventor, Dies at 86",
+        "highlight": { "text": "Dies at 86", "cue": "aged eighty six" },
+        "image": "Hotel New Yorker"
       },
-      "transition": "lightLeak"
+      "transition": "spin"
     },
     {
       "id": "s10",
-      "narration": "It started in nineteen sixty nine with ARPANET. In nineteen eighty three it switched to TCP IP. In nineteen ninety one the World Wide Web opened to the public.",
-      "visual": {
-        "type": "timeline",
-        "heading": "A very short history",
-        "events": [
-          { "date": "1969", "label": "ARPANET", "cue": "nineteen sixty nine" },
-          { "date": "1983", "label": "Switch to TCP/IP", "cue": "nineteen eighty three" },
-          { "date": "1991", "label": "The Web goes public", "cue": "nineteen ninety one" }
-        ]
-      },
-      "transition": "fade"
-    },
-    {
-      "id": "s11",
-      "narration": "At the twenty twelve London Olympics, the inventor of the web, Tim Berners-Lee, summed it up in four words.",
-      "visual": { "type": "quote", "text": "This is for everyone.", "author": "Tim Berners-Lee, 2012" },
+      "narration": "In nineteen sixty, scientists named a unit of measurement after him: the tesla.",
+      "visual": { "type": "stat", "value": "1960", "label": "the SI unit \"tesla\" is named", "context": "the unit of magnetic flux density honours him" },
       "transition": "lightLeak"
     },
     {
-      "id": "s12",
-      "narration": "So remember: addresses are looked up, data is split into packets, and cables under the sea carry it around the world. If this helped, subscribe for more.",
+      "id": "s11",
+      "narration": "So next time you flip a switch, remember Tesla: alternating current, Niagara Falls, and ideas far ahead of his time. Subscribe for more stories like this.",
       "visual": {
         "type": "bullets",
-        "heading": "Recap",
+        "heading": "Remember Tesla",
         "points": [
-          { "text": "DNS finds the address", "cue": "addresses are looked" },
-          { "text": "Packets carry the data", "cue": "split into packets" },
-          { "text": "Undersea cables connect it all", "cue": "cables under the" }
+          { "text": "Alternating current", "cue": "Tesla: alternating current" },
+          { "text": "Niagara Falls power", "cue": "Niagara Falls, and" },
+          { "text": "Ideas ahead of their time", "cue": "ahead of his" }
         ]
       },
-      "transition": "zoom"
+      "transition": "slide"
     }
   ]
 }

@@ -8,8 +8,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
-import { VideoPlan, type RenderProps } from "../shared/schema";
+import { VideoPlan, type CaptionStyle, type RenderProps } from "../shared/schema";
 import { sceneStarts } from "../shared/timing";
+import { researchImages } from "./images";
 import { prepareMusic } from "./music";
 import { renderVideo } from "./render";
 import { writeScript } from "./script";
@@ -26,6 +27,7 @@ const { values, positionals } = parseArgs({
     plan: { type: "string" },
     "job-dir": { type: "string" },
     fps: { type: "string", default: "30" },
+    captions: { type: "string", default: "bold" },
     "no-captions": { type: "boolean", default: false },
     music: { type: "string", default: "auto" },
     "skip-render": { type: "boolean", default: false },
@@ -47,7 +49,8 @@ Options:
   --plan <file>      Skip script writing and use an existing plan.json
   --job-dir <dir>    Where to write the job (default jobs/<timestamp>-<title>)
   --fps <n>          Frames per second (default 30)
-  --no-captions      Hide burned-in captions
+  --captions <style> bold (big word-by-word, default) | subtle | none
+  --no-captions      Same as --captions none
   --music <file>     Background music file, "auto" (generated pad, default) or "none"
   --skip-render      Stop after voice-over (preview in Remotion Studio instead)`);
   process.exit(prompt || values.plan ? 0 : 1);
@@ -75,6 +78,11 @@ async function main() {
   await fs.mkdir(jobDir, { recursive: true });
   await fs.writeFile(path.join(jobDir, "plan.json"), JSON.stringify(plan, null, 2));
 
+  console.log("🖼️  Researching images...");
+  const images = await researchImages(plan, jobDir, (d, t) => process.stdout.write(`\r   ${d}/${t} images`));
+  const found = Object.values(images).filter(Boolean).length;
+  process.stdout.write(`\n   ${found}/${Object.keys(images).length} found${found < Object.keys(images).length ? " (placeholders for the rest)" : ""}\n`);
+
   console.log(`🎙️  Voice-over with "${tts.name}"...`);
   const scenes = await voiceOver(plan, jobDir, tts, {
     fps,
@@ -96,8 +104,10 @@ async function main() {
     theme: plan.theme,
     fps,
     scenes,
-    showCaptions: !values["no-captions"],
+    captions: values["no-captions"] ? "none" : (values.captions as CaptionStyle),
+    grade: plan.grade,
     music,
+    images,
   };
   await fs.writeFile(path.join(jobDir, "props.json"), JSON.stringify(props, null, 2));
   console.log(`   Total length: ${Math.floor(total / 60)}m ${Math.round(total % 60)}s`);

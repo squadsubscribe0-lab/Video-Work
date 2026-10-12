@@ -40,7 +40,55 @@ const Glitch: React.FC<TransitionPresentationComponentProps<P>> = ({ presentatio
   );
 };
 
+// Incoming scene is revealed behind a torn paper edge sweeping across the frame.
+const PaperTear: React.FC<TransitionPresentationComponentProps<P>> = ({ presentationProgress: p, presentationDirection, children }) => {
+  if (presentationDirection === "exiting") return <AbsoluteFill>{children}</AbsoluteFill>;
+  const x = (1 - p) * 115 - 5; // left edge of the revealed area, in %
+  const pts: string[] = [];
+  for (let i = 0; i <= 24; i++) pts.push(`${x + (random(`tear${i}`) - 0.5) * 6}% ${(i / 24) * 100}%`);
+  const clip = `polygon(${pts.join(",")}, 100% 100%, 100% 0%)`;
+  return (
+    <AbsoluteFill>
+      <AbsoluteFill style={{ clipPath: clip }}>{children}</AbsoluteFill>
+      <AbsoluteFill style={{ clipPath: clip, translate: "-18px 0px", background: "#f1e8d4", zIndex: -1 }} />
+    </AbsoluteFill>
+  );
+};
+
+// Outgoing frame splits into top and bottom halves that fly apart.
+const Split: React.FC<TransitionPresentationComponentProps<P>> = ({ presentationProgress: p, presentationDirection, children }) => {
+  if (presentationDirection === "entering") {
+    return <AbsoluteFill style={{ scale: String(1.15 - 0.15 * p) }}>{children}</AbsoluteFill>;
+  }
+  const d = p * 55;
+  return (
+    <AbsoluteFill style={{ zIndex: 2 }}>
+      <AbsoluteFill style={{ clipPath: "inset(0 0 50% 0)", translate: `0px ${-d}%` }}>{children}</AbsoluteFill>
+      <AbsoluteFill style={{ clipPath: "inset(50% 0 0 0)", translate: `0px ${d}%` }}>{children}</AbsoluteFill>
+    </AbsoluteFill>
+  );
+};
+
+// Spin-zoom: outgoing spins away and blows up, incoming spins in from small.
+const Spin: React.FC<TransitionPresentationComponentProps<P>> = ({ presentationProgress: p, presentationDirection, children }) => {
+  const entering = presentationDirection === "entering";
+  const k = entering ? 1 - p : p;
+  return (
+    <AbsoluteFill
+      style={{
+        rotate: `${(entering ? -1 : 1) * k * 90}deg`, scale: String(entering ? 1 - 0.6 * k : 1 + 1.5 * k),
+        opacity: entering ? Math.min(1, p * 2) : 1 - p, filter: `blur(${Math.sin(p * Math.PI) * 18}px)`,
+      }}
+    >
+      {children}
+    </AbsoluteFill>
+  );
+};
+
 const whip = (): TransitionPresentation<P> => ({ component: Whip, props: {} });
+const paperTear = (): TransitionPresentation<P> => ({ component: PaperTear, props: {} });
+const split = (): TransitionPresentation<P> => ({ component: Split, props: {} });
+const spin = (): TransitionPresentation<P> => ({ component: Spin, props: {} });
 const glitch = (): TransitionPresentation<P> => ({ component: Glitch, props: {} });
 
 type AnyPresentation = TransitionPresentation<Record<string, unknown>>;
@@ -58,6 +106,9 @@ function pick(t: Transition, index: number, size: { width: number; height: numbe
     case "whip": return whip();
     case "glitch": return glitch();
     case "iris": return iris(size);
+    case "paperTear": return paperTear();
+    case "split": return split();
+    case "spin": return spin();
     default: return null;
   }
 }

@@ -30,6 +30,16 @@ export function cuesOf(visual: Visual): string[] {
       return visual.points.map((p) => p.cue);
     case "object3d":
       return visual.labels.map((l) => l.cue);
+    case "photo":
+      return visual.labels.map((l) => l.cue);
+    case "dossier":
+      return visual.facts.map((f) => f.cue);
+    case "newspaper":
+      return [visual.highlight.cue];
+    case "evidenceBoard":
+      return visual.items.map((i) => i.cue);
+    case "focusText":
+      return visual.focus.map((f) => f.cue);
     default:
       return [];
   }
@@ -123,8 +133,23 @@ export function captionLines(words: WordTiming[], maxWords = 7): WordTiming[][] 
 /** Frames a transition overlaps the previous scene. Cut-style transitions (cut, flash,
  * lightLeak) don't overlap; they're drawn as an overlay at the start of the new scene. */
 export const TRANSITION_FRAMES: Record<Transition, number> = {
-  cut: 0, flash: 0, lightLeak: 0, fade: 18, slide: 16, zoom: 16, whip: 12, glitch: 10, iris: 18,
+  cut: 0, flash: 0, lightLeak: 0, shake: 0, fade: 18, slide: 16, zoom: 16, whip: 12, glitch: 10, iris: 18,
+  paperTear: 20, split: 16, spin: 16,
 };
+
+/** Image queries a visual needs downloaded. */
+export function imageQueriesOf(visual: Visual): string[] {
+  switch (visual.type) {
+    case "photo":
+    case "dossier":
+    case "newspaper":
+      return [visual.image];
+    case "evidenceBoard":
+      return visual.items.map((i) => i.image);
+    default:
+      return [];
+  }
+}
 
 /** Start frame of each scene on the final timeline, plus the total length. */
 export function sceneStarts(scenes: { durationInFrames: number; transitionFrames: number }[]) {
@@ -136,4 +161,21 @@ export function sceneStarts(scenes: { durationInFrames: number; transitionFrames
     t += s.durationInFrames;
   });
   return { starts, total: Math.max(1, t) };
+}
+
+/** Pages of up to 3 words, split at sentence ends and pauses. */
+export function captionPages(words: WordTiming[]): WordTiming[][] {
+  const pages: WordTiming[][] = [];
+  let cur: WordTiming[] = [];
+  words.forEach((w, i) => {
+    cur.push(w);
+    const next = words[i + 1];
+    const pause = next ? next.start - w.end > 0.35 : true;
+    if (cur.length >= 3 || /[.!?,;:।]$/.test(w.text) || pause) {
+      pages.push(cur);
+      cur = [];
+    }
+  });
+  if (cur.length) pages.push(cur);
+  return pages;
 }

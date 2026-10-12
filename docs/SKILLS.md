@@ -16,8 +16,19 @@ pipeline. The table says where each one came from and what we took from it.
 | `manimce-best-practices` | same | MIT | Manim Community Edition API rules (for the planned Manim renderer). |
 | `manim-skill` | [Yusuke710/manim-skill](https://github.com/Yusuke710/manim-skill) @ `a0048d9` | MIT | 3Blue1Brown-style Manim with TTS and subtitle sync. Its subtitle linting idea inspired our cue matching. |
 | `explainer-video` | this repo | (ours) | How to run, edit and extend this pipeline. |
+| `documentary-editing` | this repo | (ours) | Editing grammar: real images, case files, focus text, jump cuts, transition meaning, grades. |
 
 Each vendored MIT skill keeps its upstream `LICENSE` file in its folder.
+
+## Code gathered
+
+| Library | Source | License | Use |
+|---|---|---|---|
+| `vendor/rve-remotion-templates` (81 components) | [reactvideoeditor/remotion-templates](https://github.com/reactvideoeditor/remotion-templates) @ `6209b72` | MIT | Reference patterns for photo treatments (polaroid, photo stack), overlays (film burn), camera shake, whip pan, text highlight. Not compiled in. |
+
+Honest assessment: public Remotion template repos are demo-level (hard-coded content, one effect each).
+The documentary look here comes from art direction built on top of them: real photos, paper/collage
+scenes, focus text, jump cuts, bold captions and colour grading.
 
 ## Assets gathered
 
@@ -25,7 +36,8 @@ Each vendored MIT skill keeps its upstream `LICENSE` file in its folder.
 |---|---|---|
 | Sound effects (`assets/sfx`) | Kenney Interface / Impact / Sci-fi packs via [kapishdima/soundcn](https://github.com/kapishdima/soundcn), plus whoosh/whip/riser generated with ffmpeg | CC0 |
 | World map | [world-atlas](https://github.com/topojson/world-atlas) (Natural Earth 1:110m) via npm | ISC / public domain data |
-| Fonts | Montserrat + Inter via Fontsource (npm) | OFL |
+| Fonts | Montserrat, Inter, Playfair Display, Special Elite, Permanent Marker via Fontsource (npm) | OFL / Apache 2.0 |
+| Photos (per video) | Wikipedia / Wikimedia Commons (and Pexels if configured), downloaded at render time | Per image, listed in `credits.txt` |
 
 ## Not included (and why)
 

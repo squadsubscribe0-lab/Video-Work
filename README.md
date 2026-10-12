@@ -63,14 +63,18 @@ npm run studio                                             # Studio with the dem
 | `SCRIPT_MODEL` | Override the Claude model (default `claude-opus-5-5`) |
 | `REMOTION_BROWSER_EXECUTABLE` | Use an existing Chrome/Chromium instead of Remotion's download |
 | `REMOTION_GL` | WebGL backend for 3D scenes (default `angle`, works without a GPU) |
+| `PEXELS_API_KEY` | Optional extra image source (stock photos) |
 
 ## What's in a video
 
 | Layer | What it does |
 |---|---|
-| **12 scene types** | `title` (trailer-style) · `kinetic` (slamming typography) · `map` (rotating globe or zooming flat map with pins and animated routes) · `object3d` (Three.js atom, planet, DNA, crystal, network, cube) · `stat` (count-up) · `bullets` · `comparison` · `process` · `barChart` · `iconGrid` · `timeline` · `quote` |
-| **Transitions** | `cut` · `flash` · `whip` (whip-pan with blur) · `zoom` (push cut) · `glitch` (RGB split) · `slide` · `iris` · `lightLeak` · `fade`, picked per scene by the script writer |
-| **Camera** | Slow push-in, handheld drift and a punch-zoom on every reveal; letterbox bars on title/kinetic/quote beats |
+| **Real images** | Photos researched automatically from Wikipedia / Wikimedia Commons (+ Pexels with `PEXELS_API_KEY`), credited in `credits.txt` |
+| **17 scene types** | Documentary: `dossier` (case file on a person) · `newspaper` (spin-in front page) · `evidenceBoard` (polaroids + red string) · `photo` (B-roll with callouts) · `focusText` (marker + circle on the key phrase). Motion graphics: `title` · `kinetic` · `map` (globe / zooming map with routes) · `object3d` (Three.js) · `stat` · `bullets` · `comparison` · `process` · `barChart` · `iconGrid` · `timeline` · `quote` |
+| **Transitions** | `cut` · `flash` · `whip` · `zoom` (push cut) · `shake` · `paperTear` · `split` · `spin` · `glitch` · `slide` · `iris` · `lightLeak` · `fade`, picked per scene by the script writer |
+| **Editing** | Jump cuts between framings at sentence ends, punch-zoom on every reveal, letterbox on title/kinetic/quote beats |
+| **Captions** | Bold word-by-word captions (`--captions bold`, default), `subtle`, or `none` |
+| **Colour grade** | `tealOrange` · `warmFilm` · `coldThriller` · `noir` · `vivid`, chosen by the script writer |
 | **Lens** | Film grain, vignette, living background (particles, perspective grid, light blobs, pulse rings) |
 | **Sound** | Whoosh/whip/glitch on transitions, pops/ticks on reveals, riser + boom on big numbers, ding on the finale (`assets/sfx`, CC0) |
 | **Music** | Generated ambient pad (or `--music your-track.mp3`), automatically ducked under the voice |

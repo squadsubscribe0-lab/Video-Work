@@ -106,6 +106,49 @@ export const Object3DVisual = z.object({
   labels: z.array(CuedText).describe("0-4 callout labels that appear around the object"),
 });
 
+const ImageQuery = z
+  .string()
+  .describe("What photo to find: an exact Wikipedia article title for people/places/events (e.g. \"Nikola Tesla\"), otherwise 2-5 descriptive keywords");
+
+export const PhotoVisual = z.object({
+  type: z.literal("photo"),
+  image: ImageQuery,
+  caption: z.string().describe("Short lower-third caption, e.g. place and year"),
+  labels: z.array(CuedText).describe("0-3 callouts that pop onto the photo"),
+});
+
+export const DossierVisual = z.object({
+  type: z.literal("dossier"),
+  name: z.string(),
+  image: ImageQuery.describe("Wikipedia article title of the person"),
+  role: z.string().describe("e.g. \"Inventor, 1856-1943\""),
+  facts: z.array(CuedText).describe("2-4 key facts typed into the file"),
+  stamp: z.string().describe("One or two words stamped on the file, e.g. \"GENIUS\", \"CLASSIFIED\""),
+});
+
+export const NewspaperVisual = z.object({
+  type: z.literal("newspaper"),
+  outlet: z.string().describe("Masthead, e.g. \"The Daily Chronicle\". Use a generic name unless quoting a real, verified headline"),
+  date: z.string(),
+  headline: z.string().describe("Max ~10 words. Must describe a real event accurately"),
+  highlight: CuedText.describe("A phrase copied from the headline that gets marked"),
+  image: ImageQuery,
+});
+
+export const EvidenceBoardVisual = z.object({
+  type: z.literal("evidenceBoard"),
+  heading: z.string(),
+  items: z
+    .array(z.object({ image: ImageQuery, label: z.string(), cue: z.string() }))
+    .describe("2-4 people/things pinned to a cork board and joined with red string"),
+});
+
+export const FocusTextVisual = z.object({
+  type: z.literal("focusText"),
+  text: z.string().describe("A key sentence (max ~16 words) shown on screen"),
+  focus: z.array(CuedText).describe("1-3 words/phrases copied from text that get highlighted and zoomed into"),
+});
+
 export const Visual = z.union([
   TitleVisual,
   BulletsVisual,
@@ -119,9 +162,18 @@ export const Visual = z.union([
   KineticVisual,
   MapVisual,
   Object3DVisual,
+  PhotoVisual,
+  DossierVisual,
+  NewspaperVisual,
+  EvidenceBoardVisual,
+  FocusTextVisual,
 ]);
 
-export const Transition = z.enum(["cut", "fade", "slide", "zoom", "whip", "glitch", "flash", "iris", "lightLeak"]);
+export const Transition = z.enum([
+  "cut", "fade", "slide", "zoom", "whip", "glitch", "flash", "iris", "lightLeak", "paperTear", "split", "spin", "shake",
+]);
+
+export const Grade = z.enum(["tealOrange", "warmFilm", "coldThriller", "noir", "vivid"]);
 
 export const Scene = z.object({
   id: z.string().describe('Stable id like "s01"'),
@@ -136,6 +188,7 @@ export const VideoPlan = z.object({
   title: z.string(),
   language: z.string().describe('BCP-47 code of the narration language, e.g. "en-US", "hi-IN", "ur-PK"'),
   theme: ThemeName,
+  grade: Grade.describe("Colour grade: tealOrange (cinematic default), warmFilm (history/nostalgia), coldThriller (mystery/crime/tech), noir (dark history), vivid (fun/science)"),
   scenes: z.array(Scene),
 });
 
@@ -144,6 +197,9 @@ export type Scene = z.infer<typeof Scene>;
 export type Visual = z.infer<typeof Visual>;
 export type ThemeName = z.infer<typeof ThemeName>;
 export type Transition = z.infer<typeof Transition>;
+export type Grade = z.infer<typeof Grade>;
+
+export type ImageAsset = { file: string; credit: string; width: number; height: number };
 
 // ---- Timing (produced by the TTS step) ----
 
@@ -169,7 +225,12 @@ export type RenderProps = {
   theme: ThemeName;
   fps: number;
   scenes: TimedScene[];
-  showCaptions: boolean;
+  captions: CaptionStyle;
+  grade: Grade;
   /** Background music file in the job's public dir, or null for none. */
   music: string | null;
+  /** Image query -> downloaded file (relative to the job dir), null when nothing was found. */
+  images: Record<string, ImageAsset | null>;
 };
+
+export type CaptionStyle = "bold" | "subtle" | "none";

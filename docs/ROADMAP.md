@@ -18,15 +18,22 @@
 - Offline maps: rotating globe and zooming flat map with pins and animated routes
 - 3D hero objects with Three.js
 
-## Phase 3: richer visuals
+## ✅ v3: documentary editing
 
-- AI images per scene (e.g. Flux / Imagen) with Ken Burns pan/zoom
-- Stock footage B-roll (Pexels / Pixabay APIs)
+- Automatic image research (Wikipedia / Wikimedia Commons / Pexels) with credits
+- Case files, newspaper spin-ins, evidence boards with red string, photo B-roll with callouts
+- Focus text (marker + hand-drawn circle + blur), bold word-by-word captions
+- Jump cuts, impact shake, paper-tear / split / spin transitions, colour grades
+
+## Phase 4: richer visuals
+
+- AI images per scene (e.g. Flux / Imagen) where no real photo exists
+- Stock video B-roll (Pexels / Pixabay video APIs)
 - Manim CE renderer for maths/diagram scenes (render clip → embed in Remotion)
 - 3D charts and custom 3D models (glTF)
 - Lottie animations / character presets
 
-## Phase 4: long-form (10 min) and quality
+## Phase 5: long-form (10 min) and quality
 
 - Two-stage writing for 10+ minutes: outline → chapters → scenes (keeps quality high over long scripts)
 - Automatic review pass: Claude checks the rendered frames and the script, then fixes weak scenes

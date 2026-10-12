@@ -15,7 +15,7 @@ const Request = z
     language: z.string().optional(),
     tts: z.enum(["edge", "elevenlabs", "mock"]).optional(),
     voice: z.string().optional(),
-    captions: z.boolean().optional(),
+    captions: z.union([z.boolean(), z.enum(["bold", "subtle", "none"])]).optional(),
   })
   .refine((r) => r.prompt || r.plan, { message: 'A request needs "prompt" or "plan"' });
 
@@ -32,7 +32,7 @@ if (req.minutes) args.push("--minutes", String(req.minutes));
 if (req.language) args.push("--language", req.language);
 if (req.tts) args.push("--tts", req.tts);
 if (req.voice) args.push("--voice", req.voice);
-if (req.captions === false) args.push("--no-captions");
+if (req.captions !== undefined && req.captions !== true) args.push("--captions", req.captions === false ? "none" : req.captions);
 if (req.prompt && !req.plan) args.push(req.prompt);
 
 const res = spawnSync("node_modules/.bin/tsx", args, { stdio: "inherit" });

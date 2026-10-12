@@ -63,6 +63,7 @@ but needs internet; `--tts elevenlabs` needs `ELEVENLABS_API_KEY`.
 
 ## Related skills in this repo
 
+- `documentary-editing`: which scene, transition and grade to use where (read before writing a plan).
 - `remotion-*` and `motion-designer` etc. (run `npm run skills:install` if missing): Remotion API rules and motion-design guidance. Load `remotion-best-practices` before writing Remotion code; `motion-designer` when planning how a scene should move and sound.
 - `visual-storyteller`, `animation-composer`, `motion-graphics`: narrative structure, pacing and kinetic-typography ideas (the examples are Manim; they inform the script prompt and scene design).
 - `manim-composer`, `manimce-best-practices`, `math-visualizer`, `manim-skill`: for a future Manim renderer for maths-heavy scenes (see `docs/ROADMAP.md`).

@@ -95,6 +95,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           REQUEST_FILE: ${{ matrix.request.file }}
           REQUEST_INLINE: ${{ toJson(matrix.request.inline) }}
           NAME: ${{ matrix.request.name }}
@@ -124,5 +125,6 @@ jobs:
           path: |
             jobs/${{ matrix.request.name }}/video.mp4
             jobs/${{ matrix.request.name }}/plan.json
+            jobs/${{ matrix.request.name }}/credits.txt
           if-no-files-found: ignore
           retention-days: 30

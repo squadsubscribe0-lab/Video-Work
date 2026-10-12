@@ -2,28 +2,53 @@ import { Audio } from "@remotion/media";
 import { TransitionSeries } from "@remotion/transitions";
 import { Fragment, useMemo } from "react";
 import { AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
-import type { RenderProps, TimedScene } from "../shared/schema";
+import type { CaptionStyle, RenderProps, TimedScene } from "../shared/schema";
 import { LEAD_IN_SECONDS, sceneStarts } from "../shared/timing";
 import { useSceneFade } from "./anim";
 import { Background } from "./components/Background";
+import { BoldCaptions } from "./components/BoldCaptions";
 import { Captions } from "./components/Captions";
 import { CameraRig, Lens, Letterbox } from "./components/Cinematic";
+import { gradeFilter, GradeOverlay } from "./components/Grade";
+import { ImagesContext } from "./components/Photo";
 import { SceneVisual } from "./scenes";
 import { FONT, THEMES, type Theme } from "./theme";
 import { EntryOverlay, presentationFor, timingFor } from "./transitions";
 
 const LETTERBOX = new Set(["title", "quote", "kinetic"]);
+// Scenes with their own camera choreography don't get editor jump cuts.
+const NO_JUMP_CUTS = new Set(["title", "kinetic", "map", "object3d", "evidenceBoard", "newspaper", "dossier"]);
+// Full-bleed scenes draw their own backdrop.
+const OWN_BACKDROP = new Set(["photo", "dossier", "newspaper", "evidenceBoard"]);
 
-const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; showCaptions: boolean; isLast: boolean }> = ({
-  scene, index, theme, showCaptions, isLast,
+/** Cut points for jump cuts: after sentence ends, at most one every ~2.5 s. */
+function jumpCuts(scene: TimedScene, fps: number): number[] {
+  if (NO_JUMP_CUTS.has(scene.visual.type)) return [];
+  const cuts: number[] = [];
+  let last = 0;
+  scene.words.forEach((w, i) => {
+    const next = scene.words[i + 1];
+    if (!next || !/[.!?,;:।]$/.test(w.text)) return;
+    const f = Math.round((next.start + LEAD_IN_SECONDS) * fps) - 1;
+    if (f - last >= fps * 2.5 && f < scene.durationInFrames - fps) {
+      cuts.push(f);
+      last = f;
+    }
+  });
+  return cuts;
+}
+
+const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; captions: CaptionStyle; isLast: boolean }> = ({
+  scene, index, theme, captions, isLast,
 }) => {
   const { fps } = useVideoConfig();
+  const showCaptions = captions !== "none";
   const fade = useSceneFade(scene.durationInFrames);
   // Scenes that hand over with a real transition shouldn't also fade to black.
   const exitOpacity = isLast ? fade : 1;
   return (
     <AbsoluteFill style={{ opacity: exitOpacity }}>
-      <Background theme={theme} />
+      {OWN_BACKDROP.has(scene.visual.type) ? null : <Background theme={theme} />}
       {scene.audioFile ? (
         <Sequence from={Math.round(LEAD_IN_SECONDS * fps)} premountFor={fps}>
           <Audio src={staticFile(scene.audioFile)} />
@@ -34,13 +59,20 @@ const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; sho
           <Audio src={staticFile(`sfx/${s.name}.mp3`)} volume={s.volume} />
         </Sequence>
       ))}
-      <CameraRig durationInFrames={scene.durationInFrames} reveals={scene.reveals} seed={scene.id}>
-        <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", paddingBottom: showCaptions ? 120 : 0 }}>
+      <CameraRig
+        durationInFrames={scene.durationInFrames}
+        reveals={scene.reveals}
+        seed={scene.id}
+        cuts={jumpCuts(scene, fps)}
+        shake={index > 0 && scene.transition === "shake"}
+      >
+        <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", paddingBottom: showCaptions && !OWN_BACKDROP.has(scene.visual.type) ? 160 : 0 }}>
           <SceneVisual visual={scene.visual} reveals={scene.reveals} theme={theme} durationInFrames={scene.durationInFrames} />
         </AbsoluteFill>
       </CameraRig>
       {LETTERBOX.has(scene.visual.type) ? <Letterbox durationInFrames={scene.durationInFrames} /> : null}
-      {showCaptions ? <Captions words={scene.words} theme={theme} /> : null}
+      {captions === "bold" ? <BoldCaptions words={scene.words} theme={theme} /> : null}
+      {captions === "subtle" ? <Captions words={scene.words} theme={theme} /> : null}
       {index > 0 ? <EntryOverlay transition={scene.transition} accent={theme.accent} accent2={theme.accent2} /> : null}
     </AbsoluteFill>
   );
@@ -78,12 +110,14 @@ function useDucking(scenes: TimedScene[], fps: number) {
   }, [scenes, fps]);
 }
 
-export const Explainer: React.FC<RenderProps> = ({ title, theme: themeName, scenes, showCaptions, music }) => {
+export const Explainer: React.FC<RenderProps> = ({ title, theme: themeName, scenes, captions, music, grade, images }) => {
   const { fps, width, height } = useVideoConfig();
   const theme = THEMES[themeName] ?? THEMES.midnight;
   const musicVolume = useDucking(scenes, fps);
   return (
+    <ImagesContext.Provider value={images ?? {}}>
     <AbsoluteFill style={{ fontFamily: FONT, color: theme.text, background: theme.bg1 }}>
+      <AbsoluteFill style={{ filter: gradeFilter(grade) }}>
       <TransitionSeries>
         {scenes.map((scene, i) => {
           const presentation = i > 0 ? presentationFor(scene.transition, i, { width, height }) : null;
@@ -93,16 +127,19 @@ export const Explainer: React.FC<RenderProps> = ({ title, theme: themeName, scen
                 <TransitionSeries.Transition presentation={presentation} timing={timingFor(scene.transition, scene.transitionFrames)} />
               ) : null}
               <TransitionSeries.Sequence durationInFrames={scene.durationInFrames} premountFor={fps}>
-                <SceneBlock scene={scene} index={i} theme={theme} showCaptions={showCaptions} isLast={i === scenes.length - 1} />
+                <SceneBlock scene={scene} index={i} theme={theme} captions={captions} isLast={i === scenes.length - 1} />
               </TransitionSeries.Sequence>
             </Fragment>
           );
         })}
       </TransitionSeries>
+      </AbsoluteFill>
+      <GradeOverlay grade={grade} />
       {music ? <Audio src={staticFile(music)} volume={musicVolume} /> : null}
       <div style={{ position: "absolute", top: 40, left: 56, fontSize: 26, fontWeight: 700, color: theme.muted, opacity: 0.7 }}>{title}</div>
       <Lens />
       <ProgressBar theme={theme} />
     </AbsoluteFill>
+    </ImagesContext.Provider>
   );
 };

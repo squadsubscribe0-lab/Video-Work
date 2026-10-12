@@ -2,6 +2,11 @@ import type { Visual } from "../../shared/schema";
 import type { Theme } from "../theme";
 import { BarChartScene } from "./BarChartScene";
 import { BulletsScene } from "./BulletsScene";
+import { DossierScene } from "./DossierScene";
+import { EvidenceBoardScene } from "./EvidenceBoardScene";
+import { FocusTextScene } from "./FocusTextScene";
+import { NewspaperScene } from "./NewspaperScene";
+import { PhotoScene } from "./PhotoScene";
 import { ComparisonScene } from "./ComparisonScene";
 import { IconGridScene } from "./IconGridScene";
 import { KineticScene } from "./KineticScene";
@@ -29,5 +34,10 @@ export const SceneVisual: React.FC<Props> = ({ visual, ...rest }) => {
     case "kinetic": return <KineticScene visual={visual} {...rest} />;
     case "map": return <MapScene visual={visual} {...rest} />;
     case "object3d": return <Object3DScene visual={visual} {...rest} />;
+    case "photo": return <PhotoScene visual={visual} {...rest} />;
+    case "dossier": return <DossierScene visual={visual} {...rest} />;
+    case "newspaper": return <NewspaperScene visual={visual} {...rest} />;
+    case "evidenceBoard": return <EvidenceBoardScene visual={visual} {...rest} />;
+    case "focusText": return <FocusTextScene visual={visual} {...rest} />;
   }
 };

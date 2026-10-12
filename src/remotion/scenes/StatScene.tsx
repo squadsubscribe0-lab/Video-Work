@@ -9,7 +9,9 @@ function countUp(value: string, p: number): string {
   if (!m) return value;
   const target = parseFloat(m[2].replace(/,/g, ""));
   const decimals = (m[2].split(".")[1] ?? "").length;
-  const n = (target * p).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  // Keep the source's grouping: "1960" stays "1960", "4,200" counts as "4,200".
+  const grouped = m[2].includes(",");
+  const n = (target * p).toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals, useGrouping: grouped });
   return `${m[1]}${n}${m[3]}`;
 }
 

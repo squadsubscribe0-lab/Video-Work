@@ -14,8 +14,10 @@ const preview: RenderProps = (() => {
     title: plan.title,
     theme: plan.theme,
     fps: FPS,
-    showCaptions: true,
+    captions: "bold",
+    grade: plan.grade,
     music: null,
+    images: {},
     scenes: plan.scenes.map((s, i) => {
       const duration = Math.max(1.5, s.narration.split(/\s+/).length / 2.5);
       const words = estimateWordTimings(s.narration, duration);

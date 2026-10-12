@@ -6,12 +6,31 @@ import { noise2D } from "@remotion/noise";
  * Slow push-in + handheld drift for the whole scene, plus a small "punch" zoom on
  * every reveal so the camera reacts to what the narrator says.
  */
-export const CameraRig: React.FC<{ durationInFrames: number; reveals: number[]; seed: string; children: React.ReactNode }> = ({
-  durationInFrames, reveals, seed, children,
-}) => {
+export const CameraRig: React.FC<{
+  durationInFrames: number;
+  reveals: number[];
+  seed: string;
+  /** Frames where an editor would cut to a new framing (sentence ends); empty = no jump cuts. */
+  cuts?: number[];
+  /** Shake the camera for the first frames (impact cut). */
+  shake?: boolean;
+  children: React.ReactNode;
+}> = ({ durationInFrames, reveals, seed, cuts = [], shake = false, children }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const push = interpolate(frame, [0, durationInFrames], [1, 1.07]);
+  // Jump cuts: hard switch between framings (wide, punched-in left, punched-in right).
+  const shot = cuts.filter((c) => frame >= c).length;
+  const FRAMINGS = [
+    { s: 1, x: 0, y: 0 },
+    { s: 1.14, x: -40, y: -20 },
+    { s: 1.06, x: 30, y: 10 },
+    { s: 1.18, x: 20, y: -30 },
+  ];
+  const framing = FRAMINGS[shot % FRAMINGS.length];
+  const shakeAmt = shake ? Math.max(0, 1 - frame / 14) : 0;
+  const sx = shakeAmt * (noise2D(`${seed}sx`, frame / 2, 0) * 40);
+  const sy = shakeAmt * (noise2D(`${seed}sy`, 0, frame / 2) * 30);
   const punch = reveals.reduce((acc, r) => {
     const s = spring({ frame: frame - r, fps, config: { damping: 12, stiffness: 180 }, durationInFrames: 18 });
     return acc + 0.018 * Math.sin(s * Math.PI);
@@ -20,7 +39,13 @@ export const CameraRig: React.FC<{ durationInFrames: number; reveals: number[]; 
   const dy = noise2D(`${seed}y`, 0, frame / 90) * 10;
   const rot = noise2D(`${seed}r`, frame / 120, 1) * 0.6;
   return (
-    <AbsoluteFill style={{ scale: String(push + punch), translate: `${dx}px ${dy}px`, rotate: `${rot}deg` }}>
+    <AbsoluteFill
+      style={{
+        scale: String((push + punch) * framing.s),
+        translate: `${dx + framing.x + sx}px ${dy + framing.y + sy}px`,
+        rotate: `${rot + shakeAmt * noise2D(`${seed}sr`, frame / 2, 2) * 2}deg`,
+      }}
+    >
       {children}
     </AbsoluteFill>
   );

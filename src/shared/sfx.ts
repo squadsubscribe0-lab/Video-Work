@@ -11,6 +11,10 @@ const TRANSITION_SFX: Partial<Record<Transition, [SfxName, number]>> = {
   iris: ["whoosh", 0.3],
   flash: ["thud", 0.5],
   lightLeak: ["shimmer", 0.3],
+  paperTear: ["whip", 0.45],
+  split: ["whoosh", 0.4],
+  spin: ["whoosh", 0.45],
+  shake: ["boom", 0.35],
 };
 
 const REVEAL_SFX: Partial<Record<Visual["type"], [SfxName, number]>> = {
@@ -23,6 +27,11 @@ const REVEAL_SFX: Partial<Record<Visual["type"], [SfxName, number]>> = {
   kinetic: ["thud", 0.5],
   map: ["pop", 0.35],
   object3d: ["click", 0.4],
+  photo: ["pop", 0.3],
+  dossier: ["tick", 0.45],
+  newspaper: ["thud", 0.45],
+  evidenceBoard: ["thud", 0.4],
+  focusText: ["click", 0.45],
 };
 
 export function sfxFor(
@@ -40,6 +49,9 @@ export function sfxFor(
     cues.push({ name: "riser", frame: 0, volume: 0.3 }, { name: "boom", frame: 45, volume: 0.45 });
   }
   if (visual.type === "map" || visual.type === "object3d") cues.push({ name: "shimmer", frame: 6, volume: 0.25 });
+  if (visual.type === "newspaper") cues.push({ name: "whip", frame: 0, volume: 0.4 }, { name: "thud", frame: 12, volume: 0.55 });
+  if (visual.type === "dossier") cues.push({ name: "thud", frame: 8, volume: 0.4 }, { name: "boom", frame: Math.max(...reveals, 30) + 30, volume: 0.35 });
+  if (visual.type === "photo") cues.push({ name: "shimmer", frame: 0, volume: 0.15 });
 
   const r = REVEAL_SFX[visual.type];
   if (r) reveals.forEach((frame) => cues.push({ name: r[0], frame, volume: r[1] }));

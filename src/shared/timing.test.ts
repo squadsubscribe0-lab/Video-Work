@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { alignmentToWords } from "../pipeline/tts/elevenlabs";
 import { sfxFor } from "./sfx";
-import { captionLines, computeReveals, estimateWordTimings, findCue, LEAD_IN_SECONDS, sceneStarts } from "./timing";
+import { captionLines, captionPages, computeReveals, estimateWordTimings, findCue, LEAD_IN_SECONDS, sceneStarts } from "./timing";
 
 const words = "Your data is chopped into small packets, and each packet can take a different route."
   .split(" ")
@@ -72,4 +72,10 @@ test("sfxFor adds transition, reveal and finale sounds", () => {
   const cues = sfxFor(visual, "whip", [30, 60], { isFirst: false, isLast: true });
   assert.deepEqual(cues.map((c) => [c.name, c.frame]), [["whip", 0], ["pop", 30], ["pop", 60], ["ding", 66]]);
   assert.equal(sfxFor(visual, "whip", [30], { isFirst: true, isLast: false })[0].name, "pop");
+});
+
+test("captionPages makes pages of at most 3 words, breaking at punctuation and pauses", () => {
+  const w = (text: string, start: number) => ({ text, start, end: start + 0.3 });
+  const pages = captionPages([w("One", 0), w("two", 0.3), w("three", 0.6), w("four", 0.9), w("five.", 1.2), w("Six", 1.5), w("seven", 2.5)]);
+  assert.deepEqual(pages.map((p) => p.map((x) => x.text).join(" ")), ["One two three", "four five.", "Six", "seven"]);
 });

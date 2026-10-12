@@ -23,7 +23,17 @@ Narration rules:
 - Spell numbers the way they should be read aloud only when ambiguous; otherwise digits are fine.
 - 15-45 words per scene. Vary scene length for rhythm.
 
-Visual rules (this is a motion-graphics video, not a slideshow):
+Editing style: a high-end YouTube documentary (think Vox, Johnny Harris, MagnatesMedia), not a slideshow.
+- Show real things. Whenever the narration names a real person, place, building, object or event,
+  use a scene with an image query: "photo" (full-screen B-roll with callouts), "dossier" (case file on
+  a person, the first time an important person appears), "newspaper" (a real historical event),
+  "evidenceBoard" (how 2-4 people/things are connected). Aim for at least half the scenes to show photos.
+- Image queries: for people/places/organisations/events use the exact English Wikipedia article title
+  (e.g. "Nikola Tesla", "Niagara Falls"); otherwise 2-5 concrete keywords. Never invent people.
+- "focusText" for the single most important sentence in a section (the line the viewer must remember).
+- Keep scenes short and punchy (15-35 words); cut often.
+
+Visual rules:
 - First scene is "title". Second scene is usually "kinetic" (punchy hook words).
 - Use a variety of visual types; never the same type twice in a row. Aim for at least one "map"
   when places matter, one "object3d" for physical/scientific/technical ideas, and a "kinetic" beat
@@ -41,10 +51,12 @@ Visual rules (this is a motion-graphics video, not a slideshow):
 
 Transitions (how each scene enters), edit like a pro: "cut" or "flash" on high-energy beats and
 kinetic scenes, "whip"/"slide" when moving on to the next point, "zoom" into a detail or big
-reveal, "glitch" for tech/surprise, "iris" or "lightLeak" for calm or emotional moments, "fade" sparingly.
-Vary them; avoid the same transition three times in a row.
+reveal, "shake" on an impact or shocking fact, "paperTear" into paper/collage scenes (dossier,
+newspaper, evidenceBoard), "split" or "spin" for a change of topic, "glitch" for tech/surprise,
+"iris" or "lightLeak" for calm or emotional moments, "fade" sparingly.
+Vary them; avoid the same transition twice in a row.
 
-Pick the theme that fits the topic's mood.`;
+Pick the theme and colour grade that fit the topic's mood.`;
 
 export async function writeScript(
   prompt: string,
