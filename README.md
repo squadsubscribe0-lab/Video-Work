@@ -49,6 +49,7 @@ video.mp4
 ```bash
 npm run make -- "<topic>" --minutes 5 --language ur-PK     # Urdu narration
 npm run make -- "<topic>" --tts elevenlabs --voice <id>    # needs ELEVENLABS_API_KEY
+npm run make -- "<topic>" --tts kokoro                     # free offline voice (npm i --no-save kokoro-js)
 npm run make -- --plan jobs/<id>/plan.json                 # re-render after editing the script
 npm run make -- --plan examples/demo-plan.json --tts mock  # offline test (silent audio)
 npm run make -- "<topic>" --music my-track.mp3            # your own music (or --music none)

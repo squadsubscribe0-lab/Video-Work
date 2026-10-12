@@ -5,7 +5,7 @@ import type { TimedScene, VideoPlan } from "../shared/schema";
 import { sfxFor } from "../shared/sfx";
 import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, TRANSITION_FRAMES } from "../shared/timing";
 import { audioDuration } from "./media";
-import type { TtsProvider } from "./tts";
+import { FALLBACK_TTS, type TtsProvider } from "./tts";
 
 // Free TTS endpoints drop connections now and then; back off and try again.
 async function withRetry<T>(fn: () => Promise<T>, tries = 5): Promise<T> {
@@ -41,6 +41,18 @@ export async function voiceOver(
   opts: { fps: number; voice?: string; onProgress?: (done: number, total: number) => void },
 ): Promise<TimedScene[]> {
   let done = 0;
+  // Probe with the first scene; if the provider is down, switch the whole video to the
+  // fallback voice (never mix two voices in one video).
+  const fallback = FALLBACK_TTS[tts.name];
+  if (fallback && plan.scenes.length && plan.language.startsWith("en")) {
+    try {
+      await withRetry(() => tts.synthesize(plan.scenes[0].narration, path.join(jobDir, "probe"), { language: plan.language, voice: opts.voice }), 3);
+    } catch (err) {
+      console.warn(`\n   ⚠️  ${tts.name} failed (${err instanceof Error ? err.message : err}); using ${fallback.name} instead`);
+      tts = fallback;
+      opts = { ...opts, voice: undefined };
+    }
+  }
   return mapLimit(plan.scenes, tts.concurrency, async (scene, i) => {
     const base = path.join(jobDir, `scene-${String(i + 1).padStart(2, "0")}`);
     const res = await withRetry(() =>
