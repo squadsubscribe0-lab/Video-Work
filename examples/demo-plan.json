@@ -1,0 +1,148 @@
+{
+  "title": "The Man Who Lit the World",
+  "language": "en-US",
+  "theme": "sunset",
+  "grade": "warmFilm",
+  "scenes": [
+    {
+      "id": "s01",
+      "narration": "Every light in your home runs on an idea from one man. Most people still don't know his story.",
+      "visual": { "type": "title", "heading": "The Man Who Lit the World", "subheading": "The story of Nikola Tesla" },
+      "transition": "fade"
+    },
+    {
+      "id": "s02",
+      "narration": "He gave us alternating current. He dreamed of wireless power. And he died almost forgotten.",
+      "visual": {
+        "type": "kinetic",
+        "lines": [
+          { "text": "Alternating current", "cue": "gave us alternating" },
+          { "text": "Wireless power", "cue": "of wireless power" },
+          { "text": "Almost forgotten", "cue": "died almost forgotten" }
+        ]
+      },
+      "transition": "flash"
+    },
+    {
+      "id": "s03",
+      "narration": "Nikola Tesla was born in eighteen fifty six in Smiljan, in today's Croatia. He spoke several languages, and over his life he held around three hundred patents.",
+      "visual": {
+        "type": "dossier",
+        "name": "Nikola Tesla",
+        "image": "Nikola Tesla",
+        "role": "Inventor, 1856-1943",
+        "facts": [
+          { "text": "Born 1856, Smiljan", "cue": "born in eighteen" },
+          { "text": "Spoke several languages", "cue": "spoke several languages" },
+          { "text": "Around 300 patents", "cue": "around three hundred" }
+        ],
+        "stamp": "Genius"
+      },
+      "transition": "paperTear"
+    },
+    {
+      "id": "s04",
+      "narration": "In eighteen eighty four he left Europe and sailed to New York with almost nothing.",
+      "visual": {
+        "type": "map",
+        "style": "flat",
+        "heading": "1884: a new life",
+        "highlight": ["Croatia", "United States of America"],
+        "points": [
+          { "label": "Smiljan", "lat": 44.57, "lon": 15.32, "cue": "he left Europe" },
+          { "label": "New York", "lat": 40.71, "lon": -74.0, "cue": "to New York" }
+        ],
+        "routes": [{ "from": "Smiljan", "to": "New York" }]
+      },
+      "transition": "whip"
+    },
+    {
+      "id": "s05",
+      "narration": "He briefly worked for Thomas Edison, who backed direct current. But Tesla's alternating current could travel much farther, and George Westinghouse bet his company on it.",
+      "visual": {
+        "type": "evidenceBoard",
+        "heading": "The War of the Currents",
+        "items": [
+          { "image": "Thomas Edison", "label": "Edison", "cue": "for Thomas Edison" },
+          { "image": "Nikola Tesla", "label": "Tesla", "cue": "Tesla's alternating current" },
+          { "image": "George Westinghouse", "label": "Westinghouse", "cue": "George Westinghouse bet" }
+        ]
+      },
+      "transition": "shake"
+    },
+    {
+      "id": "s06",
+      "narration": "The idea was simple. Alternating current could be sent much farther, so one power plant could light a whole city.",
+      "visual": {
+        "type": "focusText",
+        "text": "AC could be sent much farther and light a whole city.",
+        "focus": [
+          { "text": "much farther", "cue": "sent much farther" },
+          { "text": "a whole city", "cue": "a whole city" }
+        ]
+      },
+      "transition": "zoom"
+    },
+    {
+      "id": "s07",
+      "narration": "In eighteen ninety five, a power plant at Niagara Falls began making electricity with his alternating current system.",
+      "visual": {
+        "type": "photo",
+        "image": "Niagara Falls",
+        "caption": "Niagara Falls · 1895",
+        "labels": [
+          { "text": "Hydroelectric power", "cue": "power plant at" },
+          { "text": "Tesla's AC system", "cue": "alternating current system" }
+        ]
+      },
+      "transition": "split"
+    },
+    {
+      "id": "s08",
+      "narration": "His biggest dream was wireless power for the whole planet. It ended when the money for his Wardenclyffe Tower ran out.",
+      "visual": {
+        "type": "object3d",
+        "heading": "Wireless power for everyone",
+        "model": "planet",
+        "labels": [
+          { "text": "Wireless power", "cue": "was wireless power" },
+          { "text": "Wardenclyffe Tower", "cue": "his Wardenclyffe Tower" }
+        ]
+      },
+      "transition": "glitch"
+    },
+    {
+      "id": "s09",
+      "narration": "He died in New York in nineteen forty three, aged eighty six, alone in a hotel room.",
+      "visual": {
+        "type": "newspaper",
+        "outlet": "The Evening Ledger",
+        "date": "January 8, 1943",
+        "headline": "Nikola Tesla, Famed Inventor, Dies at 86",
+        "highlight": { "text": "Dies at 86", "cue": "aged eighty six" },
+        "image": "Hotel New Yorker"
+      },
+      "transition": "spin"
+    },
+    {
+      "id": "s10",
+      "narration": "In nineteen sixty, scientists named a unit of measurement after him: the tesla.",
+      "visual": { "type": "stat", "value": "1960", "label": "the SI unit \"tesla\" is named", "context": "the unit of magnetic flux density honours him" },
+      "transition": "lightLeak"
+    },
+    {
+      "id": "s11",
+      "narration": "So next time you flip a switch, remember Tesla: alternating current, Niagara Falls, and ideas far ahead of his time. Subscribe for more stories like this.",
+      "visual": {
+        "type": "bullets",
+        "heading": "Remember Tesla",
+        "points": [
+          { "text": "Alternating current", "cue": "Tesla: alternating current" },
+          { "text": "Niagara Falls power", "cue": "Niagara Falls, and" },
+          { "text": "Ideas ahead of their time", "cue": "ahead of his" }
+        ]
+      },
+      "transition": "slide"
+    }
+  ]
+}
