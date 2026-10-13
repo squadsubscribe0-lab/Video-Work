@@ -13,7 +13,22 @@ npm run make -- "Why do we dream?" --minutes 3
 # ✅ Done: jobs/20261011-why-do-we-dream/video.mp4
 ```
 
-## Web page: paste a title + script, get a video
+## Online studio (GitHub Pages): no computer needed
+
+**https://squadsubscribe0-lab.github.io/Video-Work/**: paste a title and script, press **Create video**.
+The page starts the "Make video" GitHub Action, follows it live, then plays the finished video
+(published as a release `video-web-…`) with a download button. All videos are listed on the page.
+
+One-time setup:
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions** (the `Publish web studio`
+   workflow then deploys `site/` on every push to `main`).
+2. Create a [fine-grained token](https://github.com/settings/personal-access-tokens/new) for this repo
+   with **Actions: Read and write**, open the page, press **Connect GitHub** and paste it. It is stored only
+   in your browser.
+3. Optional: add the `ANTHROPIC_API_KEY` secret (Settings → Secrets → Actions) so Claude directs the
+   scenes; without it the offline director is used.
+
+## Web page on your own computer
 
 ```bash
 npm install

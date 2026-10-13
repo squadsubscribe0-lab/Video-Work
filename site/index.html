@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Studio</title>
+<meta name="description" content="Paste a title and script; GitHub Actions turns it into a cinematic explainer video.">
+<style>
+  :root {
+    --bg: #050506; --panel: #0e0e11; --panel2: #15151a; --line: #24242c; --text: #f3f3f6; --muted: #9a9aa8;
+    --accent: #ff9f43; --accent2: #ff5e7e; --ok: #4ade80; --bad: #f87171; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(ellipse 60% 40% at 50% -10%, #ff9f4318, transparent 70%), var(--bg);
+  }
+  header { max-width: 1200px; margin: 0 auto; padding: 28px 16px 8px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: space-between; }
+  header h1 { margin: 0; font-size: 26px; letter-spacing: -0.5px; }
+  header h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  main { max-width: 1200px; margin: 0 auto; padding: 12px 16px 60px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 20px; }
+  @media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: linear-gradient(180deg, #ffffff08, #ffffff02), var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: inset 0 1px 0 #ffffff12, 0 20px 50px #000a; }
+  .card h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  input, select, textarea { width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font: inherit; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #ff9f4322; }
+  textarea { min-height: 300px; resize: vertical; line-height: 1.6; }
+  .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; }
+  @media (max-width: 520px) { .row { grid-template-columns: minmax(0, 1fr); } }
+  .counter { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 6px 0 4px; }
+  button { font: inherit; font-weight: 700; border: 0; border-radius: 10px; padding: 13px 18px; cursor: pointer; color: #120800; background: linear-gradient(90deg, var(--accent), var(--accent2)); box-shadow: 0 10px 30px #ff7a5a33; }
+  button:disabled { opacity: 0.5; cursor: progress; }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); box-shadow: none; font-weight: 600; padding: 8px 12px; }
+  .actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .error { color: var(--bad); font-size: 14px; overflow-wrap: anywhere; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .hint a, .setup a, a.dl { color: var(--accent); }
+  .empty { color: var(--muted); text-align: center; padding: 34px 10px; }
+  .steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 4px 0 14px; }
+  .step { font-size: 12px; color: var(--muted); padding: 8px 4px; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .step.active { color: var(--text); border-color: var(--accent); box-shadow: 0 0 20px #ff9f4322; }
+  .step.done { color: var(--ok); }
+  .bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.6s ease; }
+  .bar.busy > div { background-size: 200% 100%; background-image: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent)); animation: slide 2s linear infinite; }
+  @keyframes slide { to { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { .bar.busy > div { animation: none; } }
+  .status { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; font-size: 14px; }
+  .jobtitle { font-size: 18px; font-weight: 700; margin-bottom: 8px; overflow-wrap: anywhere; }
+  video { width: 100%; border-radius: 10px; background: #000; margin-top: 10px; display: block; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; color: var(--text); text-decoration: none; }
+  .item:hover, .item.sel { border-color: var(--accent); }
+  .item .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: #ffffff10; color: var(--muted); white-space: nowrap; }
+  .pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); } .pill.run { color: var(--accent); }
+  .side { display: flex; flex-direction: column; gap: 20px; }
+  .setup { border-color: #ff9f4366; }
+  .setup ol { margin: 6px 0 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+  .setup li { margin: 4px 0; }
+  .who { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: var(--radius); width: min(560px, calc(100% - 32px)); padding: 22px; }
+  dialog::backdrop { background: #000c; }
+  dialog h3 { margin: 0 0 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Video <span>Studio</span></h1>
+  <div class="who"><span id="who">Not connected</span><button class="ghost" id="connect" type="button">Connect GitHub</button></div>
+</header>
+
+<main>
+  <form class="card" id="form" autocomplete="off">
+    <h2>Your video</h2>
+    <label for="title">Title</label>
+    <input id="title" name="title" maxlength="140" placeholder="The Man Who Lit the World" required>
+
+    <label for="script">Script (the narration, word for word)</label>
+    <textarea id="script" name="script" maxlength="30000" placeholder="Paste your script here. Every word is spoken by the narrator; the studio splits it into scenes and designs the visuals, 3D, camera moves, music and sound effects." required></textarea>
+    <div class="counter"><span id="words">0 words</span><span id="length">~0:00 of video</span></div>
+
+    <div class="row">
+      <div>
+        <label for="language">Language</label>
+        <select id="language" name="language">
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="ur-PK">Urdu</option>
+          <option value="ar-SA">Arabic</option>
+          <option value="es-ES">Spanish</option>
+          <option value="fr-FR">French</option>
+          <option value="de-DE">German</option>
+        </select>
+      </div>
+      <div>
+        <label for="tts">Voice</label>
+        <select id="tts" name="tts">
+          <option value="edge">Edge voices (free)</option>
+          <option value="elevenlabs">ElevenLabs (needs secret)</option>
+          <option value="kokoro">Kokoro (free, English)</option>
+          <option value="mock">Silent test (no voice)</option>
+        </select>
+      </div>
+      <div>
+        <label for="captions">Captions</label>
+        <select id="captions" name="captions">
+          <option value="bold">Bold word-by-word</option>
+          <option value="subtle">Subtle</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+      <div>
+        <label for="theme">Colour theme</label>
+        <select id="theme" name="theme">
+          <option value="auto">Auto</option>
+          <option value="sunset">Sunset (orange / pink)</option>
+          <option value="midnight">Midnight (blue / pink)</option>
+          <option value="ocean">Ocean (teal / blue)</option>
+          <option value="forest">Forest (green / gold)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" id="go">Create video</button>
+      <span class="error" id="formError" role="alert"></span>
+    </div>
+    <div class="hint">Videos are made by GitHub Actions in this repo (about 10-30 min depending on length). You can close this page; it picks up where it left off.</div>
+  </form>
+
+  <div class="side">
+    <section class="card setup" id="setup" hidden>
+      <h2>One-time setup</h2>
+      <ol>
+        <li>Create a <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">fine-grained token</a>: Repository access → <b>Only select repositories</b> → <span class="repo"></span>. Permissions: <b>Actions: Read and write</b>.</li>
+        <li>Press <b>Connect GitHub</b> above and paste it. It is saved only in this browser.</li>
+        <li>For Claude-directed scenes, add the secret <code>ANTHROPIC_API_KEY</code> in the repo's <a class="secrets" target="_blank" rel="noopener">Settings → Secrets → Actions</a> (optional; without it the offline director is used).</li>
+      </ol>
+    </section>
+
+    <section class="card" aria-live="polite">
+      <h2>Progress</h2>
+      <div class="empty" id="jobEmpty">Paste a script and press <b>Create video</b>.</div>
+      <div id="jobBody" hidden>
+        <div class="jobtitle" id="jobTitle"></div>
+        <div class="steps" id="steps"></div>
+        <div class="bar" id="barWrap"><div id="bar"></div></div>
+        <div class="status"><span id="detail"></span><span id="elapsed"></span></div>
+        <div class="error" id="jobError"></div>
+        <div id="result"></div>
+        <div class="actions" style="margin-top:8px"><a class="dl" id="runLink" target="_blank" rel="noopener">View run on GitHub ↗</a></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Videos</h2>
+      <div class="list" id="list"><div class="empty" style="padding:16px">Loading…</div></div>
+    </section>
+  </div>
+</main>
+
+<dialog id="tokenDialog">
+  <form method="dialog" id="tokenForm">
+    <h3>Connect GitHub</h3>
+    <p class="hint" style="margin-top:0">Paste a fine-grained token with <b>Actions: Read and write</b> on <span class="repo"></span>. It stays in this browser's storage and is only sent to api.github.com.</p>
+    <label for="token">Token</label>
+    <input id="token" type="password" placeholder="github_pat_…" autocomplete="off">
+    <label for="repoInput">Repository</label>
+    <input id="repoInput" placeholder="owner/repo">
+    <div class="actions">
+      <button value="save" id="saveToken">Save</button>
+      <button class="ghost" value="forget" id="forget" type="button">Disconnect</button>
+      <button class="ghost" value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const API = "https://api.github.com";
+const store = {
+  get(k, d = null) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+// owner/repo: from the Pages URL (owner.github.io/repo), overridable in the dialog.
+function defaultRepo() {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const name = location.pathname.split("/").filter(Boolean)[0];
+  return m && name ? `${m[1]}/${name}` : "squadsubscribe0-lab/Video-Work";
+}
+let repo = store.get("repo", defaultRepo());
+let token = store.get("token", "");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+async function gh(path, opts = {}) {
+  const headers = { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(opts.body ? { "Content-Type": "application/json" } : {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const res = await fetch(`${API}/repos/${repo}${path}`, { ...opts, headers });
+  if (res.status === 204) return null;
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const msg = data.message || res.statusText;
+    if (res.status === 401) throw new Error("GitHub rejected the token (expired or wrong). Press Connect GitHub to update it.");
+    if (res.status === 403 && /rate limit/i.test(msg)) throw new Error("GitHub rate limit reached. Connect GitHub (or wait an hour).");
+    if (res.status === 403 || res.status === 404) throw new Error(`${msg}. Check the token has Actions: Read and write on ${repo}.`);
+    if (res.status === 422) throw new Error(`${msg}. Is the "Make video" workflow on the default branch?`);
+    throw new Error(msg);
+  }
+  return data;
+}
+
+// ---- Connect ----
+function renderWho() {
+  $("who").textContent = token ? `Connected · ${repo}` : "Not connected";
+  $("connect").textContent = token ? "Settings" : "Connect GitHub";
+  $("setup").hidden = Boolean(token);
+  document.querySelectorAll(".repo").forEach((el) => (el.textContent = repo));
+  document.querySelectorAll(".secrets").forEach((el) => (el.href = `https://github.com/${repo}/settings/secrets/actions`));
+}
+$("connect").addEventListener("click", () => {
+  $("token").value = token;
+  $("repoInput").value = repo;
+  $("tokenDialog").showModal();
+});
+$("tokenForm").addEventListener("submit", (e) => {
+  if (e.submitter?.value !== "save") return;
+  token = $("token").value.trim();
+  const r = $("repoInput").value.trim();
+  if (/^[\w.-]+\/[\w.-]+$/.test(r)) repo = r;
+  store.set("token", token);
+  store.set("repo", repo);
+  renderWho();
+  loadList();
+});
+$("forget").addEventListener("click", () => {
+  token = "";
+  store.set("token", null);
+  $("tokenDialog").close();
+  renderWho();
+});
+
+// ---- Form ----
+function count() {
+  const n = $("script").value.trim().split(/\s+/).filter(Boolean).length;
+  const secs = Math.round((n / 150) * 60);
+  $("words").textContent = `${n} words`;
+  $("length").textContent = `~${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} of video`;
+}
+$("script").addEventListener("input", count);
+const draft = store.get("draft", {});
+for (const k of ["title", "script", "language", "tts", "captions", "theme"]) if (draft[k]) $(k).value = draft[k];
+$("form").addEventListener("input", () => store.set("draft", Object.fromEntries(new FormData($("form")))));
+count();
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("formError").textContent = "";
+  if (!token) { $("connect").click(); return; }
+  const f = Object.fromEntries(new FormData($("form")));
+  if (f.script.trim().split(/\s+/).length < 5) { $("formError").textContent = "The script is too short."; return; }
+  const slug = f.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 24) || "video";
+  const id = `web-${Date.now().toString(36)}-${slug}`;
+  $("go").disabled = true;
+  try {
+    const res = await gh("/actions/workflows/make-video.yml/dispatches", {
+      method: "POST",
+      body: JSON.stringify({
+        ref: "main",
+        return_run_details: true,
+        inputs: { title: f.title.trim(), script: f.script.trim(), language: f.language, tts: f.tts, captions: f.captions, theme: f.theme, request_id: id },
+      }),
+    });
+    const job = { id, title: f.title.trim(), started: Date.now(), runId: res?.workflow_run_id ?? null };
+    store.set("active", job);
+    follow(job);
+  } catch (err) {
+    $("formError").textContent = err.message;
+  } finally {
+    $("go").disabled = false;
+  }
+});
+
+// ---- Follow a run ----
+const STEPS = [["queued", "Queued"], ["setup", "Setting up"], ["make", "Making video"], ["publish", "Publishing"]];
+let timer = null;
+let following = null;
+
+async function findRun(job) {
+  const data = await gh(`/actions/workflows/make-video.yml/runs?event=workflow_dispatch&per_page=30`);
+  return data.workflow_runs.find((r) => r.display_title?.includes(`[${job.id}]`)) ?? null;
+}
+
+function stageOf(run, jobs) {
+  if (!run || run.status === "queued" || run.status === "waiting" || run.status === "pending") return "queued";
+  const steps = jobs.flatMap((j) => (j.name.startsWith("render") ? j.steps : []));
+  const step = (name) => steps.find((s) => s.name.startsWith(name));
+  if (step("Publish")?.status === "in_progress" || step("Publish")?.status === "completed") return "publish";
+  if (step("Make the video")?.status === "in_progress" || step("Make the video")?.status === "completed") return "make";
+  return "setup";
+}
+
+function showJob(job, { stage, detail, error, video, runUrl, done }) {
+  $("jobEmpty").hidden = true;
+  $("jobBody").hidden = false;
+  $("jobTitle").textContent = job.title;
+  const at = STEPS.findIndex(([k]) => k === stage);
+  $("steps").innerHTML = STEPS.map(([k, label], i) => `<div class="step ${done && !error ? "done" : i < at ? "done" : i === at ? "active" : ""}">${label}</div>`).join("");
+  $("bar").style.width = done ? "100%" : `${[8, 18, 40, 92][Math.max(0, at)]}%`;
+  $("barWrap").classList.toggle("busy", !done);
+  $("detail").textContent = detail;
+  $("jobError").textContent = error || "";
+  const mins = Math.floor((Date.now() - job.started) / 60000);
+  $("elapsed").textContent = done ? "" : `${mins} min`;
+  $("runLink").hidden = !runUrl;
+  if (runUrl) $("runLink").href = runUrl;
+  if (video && $("result").dataset.src !== video.url) {
+    $("result").dataset.src = video.url;
+    $("result").innerHTML = `<video controls preload="metadata" src="${esc(video.url)}"></video>
+      <div class="actions"><a class="dl" href="${esc(video.url)}" download>⬇ Download MP4</a><a class="dl" href="${esc(video.page)}" target="_blank" rel="noopener">Release page ↗</a></div>`;
+  }
+  if (!video) { $("result").innerHTML = ""; $("result").dataset.src = ""; }
+}
+
+async function releaseVideo(id) {
+  try {
+    const rel = await gh(`/releases/tags/video-${encodeURIComponent(id)}`);
+    const asset = rel.assets.find((a) => a.name.endsWith(".mp4"));
+    return asset ? { url: asset.browser_download_url, page: rel.html_url } : null;
+  } catch { return null; }
+}
+
+async function poll(job) {
+  if (following !== job.id) return;
+  try {
+    let run = job.runId ? await gh(`/actions/runs/${job.runId}`) : await findRun(job);
+    if (run && !job.runId) { job.runId = run.id; store.set("active", job); }
+    if (!run) {
+      showJob(job, { stage: "queued", detail: "Waiting for GitHub to start the run…" });
+    } else if (run.status !== "completed") {
+      const jobs = (await gh(`/actions/runs/${run.id}/jobs`)).jobs;
+      const stage = stageOf(run, jobs);
+      const detail = { queued: "Waiting for a GitHub runner", setup: "Installing ffmpeg, fonts and the renderer", make: "Directing, recording the voice and rendering", publish: "Uploading the video" }[stage];
+      showJob(job, { stage, detail, runUrl: run.html_url });
+    } else if (run.conclusion === "success") {
+      const video = await releaseVideo(job.id);
+      showJob(job, { stage: "publish", detail: video ? "Your video is ready" : "Finished, but no video was published. Open the run for details.", video, runUrl: run.html_url, done: true, error: video ? "" : " " });
+      if (store.get("active")?.id === job.id) store.set("active", null);
+      loadList();
+      return;
+    } else {
+      showJob(job, { stage: "make", detail: "", error: `The run ${run.conclusion}. Open it on GitHub to see why.`, runUrl: run.html_url, done: true });
+      if (store.get("active")?.id === job.id) store.set("active", null);
+      return;
+    }
+  } catch (err) {
+    showJob(job, { stage: "queued", detail: "", error: err.message });
+  }
+  timer = setTimeout(() => poll(job), 8000);
+}
+
+function follow(job) {
+  clearTimeout(timer);
+  following = job.id;
+  $("result").innerHTML = "";
+  $("result").dataset.src = "";
+  showJob(job, { stage: "queued", detail: "Starting…" });
+  poll(job);
+}
+
+// ---- Video list (releases are public, so this works before connecting) ----
+async function loadList() {
+  try {
+    const rels = (await gh(`/releases?per_page=40`)).filter((r) => r.tag_name.startsWith("video-"));
+    const active = store.get("active");
+    const items = [];
+    if (active) items.push(`<div class="item sel" data-active="1"><span class="t">${esc(active.title)}</span><span class="pill run">Making…</span></div>`);
+    for (const r of rels) {
+      const id = r.tag_name.slice(6);
+      items.push(`<div class="item" data-id="${esc(id)}" data-title="${esc(r.name.replace(/^🎬\s*/, ""))}" data-time="${Date.parse(r.created_at)}" role="button" tabindex="0">
+        <span class="t">${esc(r.name.replace(/^🎬\s*/, ""))}</span><span class="pill ok">${new Date(r.created_at).toLocaleDateString()}</span></div>`);
+    }
+    $("list").innerHTML = items.join("") || `<div class="empty" style="padding:16px">No videos yet.</div>`;
+  } catch (err) {
+    $("list").innerHTML = `<div class="error">${esc(err.message)}</div>`;
+  }
+}
+function openItem(item) {
+  if (item.dataset.active) return follow(store.get("active"));
+  const job = { id: item.dataset.id, title: item.dataset.title, started: Number(item.dataset.time), runId: null };
+  clearTimeout(timer);
+  following = job.id;
+  releaseVideo(job.id).then((video) => showJob(job, { stage: "publish", detail: "Ready", video, done: true }));
+}
+$("list").addEventListener("click", (e) => { const it = e.target.closest(".item"); if (it) openItem(it); });
+$("list").addEventListener("keydown", (e) => { const it = e.target.closest(".item"); if (it && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); openItem(it); } });
+
+renderWho();
+loadList();
+const active = store.get("active");
+if (active) follow(active);
+</script>
+</body>
+</html>

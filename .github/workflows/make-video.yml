@@ -5,12 +5,30 @@ name: Make video
 #  2. Add or edit a file in requests/*.json and push (see requests/README.md).
 # The finished MP4 is attached to the run under "Artifacts".
 
+# Runs started from the web studio (site/) are named "<title> [<request_id>]" so the page can find them.
+run-name: ${{ inputs.request_id && format('{0} [{1}]', inputs.title, inputs.request_id) || inputs.prompt || 'Make video' }}
+
 on:
   workflow_dispatch:
     inputs:
       prompt:
-        description: "Topic / brief for the video"
-        required: true
+        description: "Topic / brief for the video (leave empty when you give a script)"
+        required: false
+      title:
+        description: "Video title (with script)"
+        required: false
+      script:
+        description: "Your own narration, used word for word (instead of a prompt)"
+        required: false
+      captions:
+        description: "Captions: bold, subtle or none"
+        default: "bold"
+      theme:
+        description: "Colour theme: auto, midnight, sunset, ocean, forest"
+        default: "auto"
+      request_id:
+        description: "Set by the web studio; the video is published as release video-<request_id>"
+        required: false
       minutes:
         description: "Target length in minutes"
         default: "2"
@@ -20,7 +38,7 @@ on:
       tts:
         description: "Voice engine"
         type: choice
-        options: [edge, elevenlabs, mock]
+        options: [edge, elevenlabs, kokoro, mock]
         default: edge
   push:
     paths:
@@ -48,12 +66,22 @@ jobs:
           MINUTES: ${{ inputs.minutes }}
           LANGUAGE: ${{ inputs.language }}
           TTS: ${{ inputs.tts }}
+          TITLE: ${{ inputs.title }}
+          SCRIPT: ${{ inputs.script }}
+          CAPTIONS: ${{ inputs.captions }}
+          THEME: ${{ inputs.theme }}
+          REQUEST_ID: ${{ inputs.request_id }}
         run: |
           if [ "$EVENT" = "workflow_dispatch" ]; then
             # The form becomes a one-off request, passed to the render job as JSON.
-            req=$(jq -cn --arg p "$PROMPT" --arg m "$MINUTES" --arg l "$LANGUAGE" --arg t "$TTS" \
-              '{prompt:$p, minutes:($m|tonumber), language:$l, tts:$t}')
-            echo "requests=$(jq -cn --argjson r "$req" '[{name:"manual", inline:$r}]')" >> "$GITHUB_OUTPUT"
+            req=$(jq -cn --arg p "$PROMPT" --arg m "${MINUTES:-2}" --arg l "${LANGUAGE:-en-US}" --arg t "${TTS:-edge}" \
+              --arg title "$TITLE" --arg script "$SCRIPT" --arg c "${CAPTIONS:-bold}" --arg th "${THEME:-auto}" \
+              '{minutes:($m|tonumber), language:$l, tts:$t, captions:$c, theme:$th}
+               + (if $script != "" then {title:$title, script:$script} else {prompt:$p} end)')
+            name=manual
+            if [ -n "$REQUEST_ID" ]; then name="$REQUEST_ID"; fi
+            if ! [[ "$name" =~ ^[A-Za-z0-9_-]+$ ]]; then echo "Bad request_id"; exit 1; fi
+            echo "requests=$(jq -cn --argjson r "$req" --arg n "$name" '[{name:$n, inline:$r, release:($n != "manual")}]')" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
@@ -68,6 +96,8 @@ jobs:
     needs: plan
     if: needs.plan.outputs.requests != '[]'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # publish web-studio videos as releases
     timeout-minutes: 300
     strategy:
       fail-fast: false
@@ -121,6 +151,18 @@ jobs:
           else
             echo "### ❌ No video was produced for \`$NAME\` - see the logs above." >> "$GITHUB_STEP_SUMMARY"
           fi
+      - name: Publish to the web studio
+        # Videos ordered from the web page become a release, so the page can play and download them.
+        if: matrix.request.release && hashFiles(format('jobs/{0}/video.mp4', matrix.request.name)) != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: ${{ matrix.request.name }}
+        run: |
+          title=$(jq -r .title "jobs/$NAME/plan.json")
+          cp "jobs/$NAME/video.mp4" "$RUNNER_TEMP/video.mp4"
+          gh release create "video-$NAME" "$RUNNER_TEMP/video.mp4" "jobs/$NAME/plan.json" \
+            --title "🎬 $title" --notes "Made with the Video Studio. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --target "$GITHUB_SHA"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
