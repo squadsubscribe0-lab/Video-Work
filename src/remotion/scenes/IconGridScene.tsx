@@ -1,6 +1,6 @@
 import { useEnter } from "../anim";
 import { Heading } from "../components/Heading";
-import type { Theme } from "../theme";
+import { panel, type Theme } from "../theme";
 import type { SceneProps } from "./types";
 
 const Tile: React.FC<{ emoji: string; label: string; at: number; theme: Theme }> = ({ emoji, label, at, theme }) => {
@@ -8,7 +8,7 @@ const Tile: React.FC<{ emoji: string; label: string; at: number; theme: Theme }>
   return (
     <div
       style={{
-        width: 420, padding: "44px 24px", borderRadius: 32, background: theme.card, textAlign: "center",
+        width: 420, padding: "44px 24px", borderRadius: 32, ...panel(theme), textAlign: "center",
         opacity: p, scale: String(0.7 + 0.3 * p), border: `2px solid ${theme.accent}${p > 0.5 ? "66" : "00"}`,
       }}
     >

@@ -40,7 +40,8 @@ video.mp4
 |---|---|
 | `src/pipeline/` | CLI, Claude script writer, TTS providers, render step |
 | `src/remotion/` | The video: composition, 9 scene types, background, captions, themes |
-| `src/shared/` | Plan schema (zod) and timing/sync logic (with tests) |
+| `src/shared/` | Plan schema (zod), timing/sync logic, the "director" (backdrop + shot picks, jump cuts) and sound design (with tests) |
+| `sound-packs/` | CC0 Kenney sound packs used by the sound design |
 | `examples/demo-plan.json` | A complete 2-minute sample plan |
 | `.claude/skills/` | Agent skills gathered from GitHub + this repo's own `explainer-video` skill ([docs/SKILLS.md](docs/SKILLS.md)) |
 
@@ -73,11 +74,15 @@ npm run studio                                             # Studio with the dem
 | **Real images** | Photos researched automatically from Wikipedia / Wikimedia Commons (+ Pexels with `PEXELS_API_KEY`), credited in `credits.txt` |
 | **17 scene types** | Documentary: `dossier` (case file on a person) · `newspaper` (spin-in front page) · `evidenceBoard` (polaroids + red string) · `photo` (B-roll with callouts) · `focusText` (marker + circle on the key phrase). Motion graphics: `title` · `kinetic` · `map` (globe / zooming map with routes) · `object3d` (Three.js) · `stat` · `bullets` · `comparison` · `process` · `barChart` · `iconGrid` · `timeline` · `quote` |
 | **Transitions** | `cut` · `flash` · `whip` · `zoom` (push cut) · `shake` · `paperTear` · `split` · `spin` · `glitch` · `slide` · `iris` · `lightLeak` · `fade`, picked per scene by the script writer |
-| **Editing** | Jump cuts between framings at sentence ends, punch-zoom on every reveal, letterbox on title/kinetic/quote beats |
+| **Cold open** | Title tears in on frame 0: anamorphic flare sweep, letters fly out of the dark in 3D, metal light-sweep, shockwave; letterbox already in place, no slow fade-up |
+| **Camera shots** | Every scene is "shot": `push` · `pull` · `truckLeft/Right` · `craneUp/Down` · `orbit` (3D swing) · `dutch` · `rackFocus` · `snapZoom`, with a speed ramp (fast on the cut, slow drift after) and out-of-focus foreground dust for parallax depth |
+| **Editing** | Jump cuts at sentence ends, punch-zoom on every reveal, RGB-split impact hits on slammed words / numbers / impact cuts, letterbox on title/kinetic/quote/3D beats |
+| **Backdrops** | Mostly black so everything pops (embossed type, glass panels): `void` · `dots` · `stars` · `warp` · `streaks` · `smoke` · `grid` · `rays` · `tunnel` · `shapes3d` (real Three.js) · `gradient`; never the same twice in a row |
+| **3D** | `object3d` scenes with an orbiting camera, rim lights, glossy floor and 3D dust; models: atom, planet, globe, dna, crystal, network, cube, lightbulb, gears, rocket, coin, lightning (Tesla coil with live arcs), chip |
 | **Captions** | Bold word-by-word captions (`--captions bold`, default), `subtle`, or `none` |
 | **Colour grade** | `tealOrange` · `warmFilm` · `coldThriller` · `noir` · `vivid`, chosen by the script writer |
 | **Lens** | Film grain, vignette, living background (particles, perspective grid, light blobs, pulse rings) |
-| **Sound** | Whoosh/whip/glitch on transitions, pops/ticks on reveals, riser + boom on big numbers, ding on the finale (`assets/sfx`, CC0) |
+| **Sound** | Layered effects from `sound-packs/` (Kenney, CC0) + cinematic hits in `assets/sfx`: whoosh/glitch/scratch on transitions, pop-ins/drops/switches on reveals, typewriter keys on case files, ticking count-up + boom on numbers, shutter clicks on jump cuts, success + glass on the finale. Variants rotate so repeats never sound identical (`src/shared/sfx.ts`) |
 | **Music** | Generated ambient pad (or `--music your-track.mp3`), automatically ducked under the voice |
 
 Items in a scene carry a `cue`: words copied from the narration. The item appears on the exact frame the

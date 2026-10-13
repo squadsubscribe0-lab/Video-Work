@@ -7,7 +7,11 @@
     {
       "id": "s01",
       "narration": "Every light in your home runs on an idea from one man. Most people still don't know his story.",
-      "visual": { "type": "title", "heading": "The Man Who Lit the World", "subheading": "The story of Nikola Tesla" },
+      "visual": {
+        "type": "title",
+        "heading": "The Man Who Lit the World",
+        "subheading": "The story of Nikola Tesla"
+      },
       "transition": "fade"
     },
     {
@@ -16,9 +20,18 @@
       "visual": {
         "type": "kinetic",
         "lines": [
-          { "text": "Alternating current", "cue": "gave us alternating" },
-          { "text": "Wireless power", "cue": "of wireless power" },
-          { "text": "Almost forgotten", "cue": "died almost forgotten" }
+          {
+            "text": "Alternating current",
+            "cue": "gave us alternating"
+          },
+          {
+            "text": "Wireless power",
+            "cue": "of wireless power"
+          },
+          {
+            "text": "Almost forgotten",
+            "cue": "died almost forgotten"
+          }
         ]
       },
       "transition": "flash"
@@ -32,9 +45,18 @@
         "image": "Nikola Tesla",
         "role": "Inventor, 1856-1943",
         "facts": [
-          { "text": "Born 1856, Smiljan", "cue": "born in eighteen" },
-          { "text": "Spoke several languages", "cue": "spoke several languages" },
-          { "text": "Around 300 patents", "cue": "around three hundred" }
+          {
+            "text": "Born 1856, Smiljan",
+            "cue": "born in eighteen"
+          },
+          {
+            "text": "Spoke several languages",
+            "cue": "spoke several languages"
+          },
+          {
+            "text": "Around 300 patents",
+            "cue": "around three hundred"
+          }
         ],
         "stamp": "Genius"
       },
@@ -47,12 +69,30 @@
         "type": "map",
         "style": "flat",
         "heading": "1884: a new life",
-        "highlight": ["Croatia", "United States of America"],
-        "points": [
-          { "label": "Smiljan", "lat": 44.57, "lon": 15.32, "cue": "he left Europe" },
-          { "label": "New York", "lat": 40.71, "lon": -74.0, "cue": "to New York" }
+        "highlight": [
+          "Croatia",
+          "United States of America"
         ],
-        "routes": [{ "from": "Smiljan", "to": "New York" }]
+        "points": [
+          {
+            "label": "Smiljan",
+            "lat": 44.57,
+            "lon": 15.32,
+            "cue": "he left Europe"
+          },
+          {
+            "label": "New York",
+            "lat": 40.71,
+            "lon": -74.0,
+            "cue": "to New York"
+          }
+        ],
+        "routes": [
+          {
+            "from": "Smiljan",
+            "to": "New York"
+          }
+        ]
       },
       "transition": "whip"
     },
@@ -63,9 +103,21 @@
         "type": "evidenceBoard",
         "heading": "The War of the Currents",
         "items": [
-          { "image": "Thomas Edison", "label": "Edison", "cue": "for Thomas Edison" },
-          { "image": "Nikola Tesla", "label": "Tesla", "cue": "Tesla's alternating current" },
-          { "image": "George Westinghouse", "label": "Westinghouse", "cue": "George Westinghouse bet" }
+          {
+            "image": "Thomas Edison",
+            "label": "Edison",
+            "cue": "for Thomas Edison"
+          },
+          {
+            "image": "Nikola Tesla",
+            "label": "Tesla",
+            "cue": "Tesla's alternating current"
+          },
+          {
+            "image": "George Westinghouse",
+            "label": "Westinghouse",
+            "cue": "George Westinghouse bet"
+          }
         ]
       },
       "transition": "shake"
@@ -77,8 +129,14 @@
         "type": "focusText",
         "text": "AC could be sent much farther and light a whole city.",
         "focus": [
-          { "text": "much farther", "cue": "sent much farther" },
-          { "text": "a whole city", "cue": "a whole city" }
+          {
+            "text": "much farther",
+            "cue": "sent much farther"
+          },
+          {
+            "text": "a whole city",
+            "cue": "a whole city"
+          }
         ]
       },
       "transition": "zoom"
@@ -91,8 +149,14 @@
         "image": "Niagara Falls",
         "caption": "Niagara Falls · 1895",
         "labels": [
-          { "text": "Hydroelectric power", "cue": "power plant at" },
-          { "text": "Tesla's AC system", "cue": "alternating current system" }
+          {
+            "text": "Hydroelectric power",
+            "cue": "power plant at"
+          },
+          {
+            "text": "Tesla's AC system",
+            "cue": "alternating current system"
+          }
         ]
       },
       "transition": "split"
@@ -103,10 +167,16 @@
       "visual": {
         "type": "object3d",
         "heading": "Wireless power for everyone",
-        "model": "planet",
+        "model": "lightning",
         "labels": [
-          { "text": "Wireless power", "cue": "was wireless power" },
-          { "text": "Wardenclyffe Tower", "cue": "his Wardenclyffe Tower" }
+          {
+            "text": "Wireless power",
+            "cue": "was wireless power"
+          },
+          {
+            "text": "Wardenclyffe Tower",
+            "cue": "his Wardenclyffe Tower"
+          }
         ]
       },
       "transition": "glitch"
@@ -119,7 +189,10 @@
         "outlet": "The Evening Ledger",
         "date": "January 8, 1943",
         "headline": "Nikola Tesla, Famed Inventor, Dies at 86",
-        "highlight": { "text": "Dies at 86", "cue": "aged eighty six" },
+        "highlight": {
+          "text": "Dies at 86",
+          "cue": "aged eighty six"
+        },
         "image": "Hotel New Yorker"
       },
       "transition": "spin"
@@ -127,7 +200,12 @@
     {
       "id": "s10",
       "narration": "In nineteen sixty, scientists named a unit of measurement after him: the tesla.",
-      "visual": { "type": "stat", "value": "1960", "label": "the SI unit \"tesla\" is named", "context": "the unit of magnetic flux density honours him" },
+      "visual": {
+        "type": "stat",
+        "value": "1960",
+        "label": "the SI unit \"tesla\" is named",
+        "context": "the unit of magnetic flux density honours him"
+      },
       "transition": "lightLeak"
     },
     {
@@ -137,9 +215,18 @@
         "type": "bullets",
         "heading": "Remember Tesla",
         "points": [
-          { "text": "Alternating current", "cue": "Tesla: alternating current" },
-          { "text": "Niagara Falls power", "cue": "Niagara Falls, and" },
-          { "text": "Ideas ahead of their time", "cue": "ahead of his" }
+          {
+            "text": "Alternating current",
+            "cue": "Tesla: alternating current"
+          },
+          {
+            "text": "Niagara Falls power",
+            "cue": "Niagara Falls, and"
+          },
+          {
+            "text": "Ideas ahead of their time",
+            "cue": "ahead of his"
+          }
         ]
       },
       "transition": "slide"

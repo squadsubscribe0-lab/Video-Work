@@ -2,8 +2,8 @@
 // points, so every on-screen element appears exactly when the voice mentions it.
 import type { Transition, Visual, WordTiming } from "./schema";
 
-export const LEAD_IN_SECONDS = 0.35; // silence before the voice starts in each scene
-export const TAIL_SECONDS = 0.6; // breathing room after the voice ends
+export const LEAD_IN_SECONDS = 0.2; // silence before the voice starts in each scene
+export const TAIL_SECONDS = 0.35; // breathing room after the voice ends (tight, so the edit keeps moving)
 
 const norm = (s: string) => s.toLowerCase().normalize("NFKC").replace(/[^\p{L}\p{M}\p{N}]+/gu, "");
 

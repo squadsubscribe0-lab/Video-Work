@@ -101,7 +101,7 @@ export const Object3DVisual = z.object({
   type: z.literal("object3d"),
   heading: z.string(),
   model: z
-    .enum(["atom", "planet", "dna", "crystal", "network", "cube"])
+    .enum(["atom", "planet", "dna", "crystal", "network", "cube", "lightbulb", "gears", "rocket", "coin", "lightning", "chip", "globe"])
     .describe("The 3D hero object that best represents the idea"),
   labels: z.array(CuedText).describe("0-4 callout labels that appear around the object"),
 });
@@ -173,6 +173,14 @@ export const Transition = z.enum([
   "cut", "fade", "slide", "zoom", "whip", "glitch", "flash", "iris", "lightLeak", "paperTear", "split", "spin", "shake",
 ]);
 
+export const Backdrop = z.enum([
+  "void", "dots", "stars", "warp", "streaks", "smoke", "grid", "rays", "tunnel", "shapes3d", "gradient",
+]);
+
+export const Shot = z.enum([
+  "push", "pull", "truckLeft", "truckRight", "craneUp", "craneDown", "orbit", "dutch", "rackFocus", "snapZoom",
+]);
+
 export const Grade = z.enum(["tealOrange", "warmFilm", "coldThriller", "noir", "vivid"]);
 
 export const Scene = z.object({
@@ -180,6 +188,12 @@ export const Scene = z.object({
   narration: z.string().describe("Exactly what the voice-over says in this scene. 1-4 sentences."),
   visual: Visual,
   transition: Transition.describe("How this scene enters. Vary them; use cut/flash for energy, fade for calm."),
+  background: Backdrop.optional().describe(
+    "Backdrop behind the visual. Mostly black ones: void (spotlit black stage), dots, stars, warp (hyperspace, for hooks), streaks (lens flares), smoke, grid (tron floor), rays (god rays), tunnel, shapes3d (floating 3D shapes); gradient = colourful theme gradient, use rarely. Never the same twice in a row.",
+  ),
+  shot: Shot.optional().describe(
+    "Camera move for the scene: push (dolly in), pull (dolly out), truckLeft/truckRight (slide sideways), craneUp/craneDown, orbit (3D swing round), dutch (tilted, tense), rackFocus (blur to sharp), snapZoom (fast punch-in). Vary them.",
+  ),
 });
 
 export const ThemeName = z.enum(["midnight", "sunset", "ocean", "forest"]);
@@ -198,6 +212,8 @@ export type Visual = z.infer<typeof Visual>;
 export type ThemeName = z.infer<typeof ThemeName>;
 export type Transition = z.infer<typeof Transition>;
 export type Grade = z.infer<typeof Grade>;
+export type Backdrop = z.infer<typeof Backdrop>;
+export type Shot = z.infer<typeof Shot>;
 
 export type ImageAsset = { file: string; credit: string; width: number; height: number };
 
@@ -212,13 +228,19 @@ export type TimedScene = Scene & {
   words: WordTiming[];
   reveals: number[]; // frame (relative to scene start) at which each cued item appears
   transitionFrames: number; // overlap with the previous scene (0 for the first scene and for cuts)
+  background: Backdrop; // resolved (plan value or automatic pick)
+  shot: Shot; // resolved camera move
+  cuts: number[]; // editor jump cuts (frames relative to scene start)
   sfx: SfxCue[];
 };
 
 export type SfxName =
-  | "pop" | "click" | "tick" | "glitch" | "ding" | "thud" | "boom" | "shimmer" | "whoosh" | "whip" | "riser";
+  | "whoosh" | "whip" | "riser" | "boom" | "thud" | "shimmer"
+  | "pop" | "popIn" | "popOut" | "open" | "close" | "click" | "tick" | "type" | "glitch" | "scratch"
+  | "ding" | "success" | "bong" | "glass" | "error" | "question" | "scroll" | "select" | "switch" | "toggle" | "drop" | "back";
 
-export type SfxCue = { name: SfxName; frame: number; volume: number }; // frame relative to scene start
+/** `file` is relative to the job's public dir; `frame` is relative to the scene start. */
+export type SfxCue = { name: SfxName; frame: number; volume: number; file: string };
 
 export type RenderProps = {
   title: string;

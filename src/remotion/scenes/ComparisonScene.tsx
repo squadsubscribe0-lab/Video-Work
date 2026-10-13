@@ -1,6 +1,6 @@
 import { useRise } from "../anim";
 import { Heading } from "../components/Heading";
-import type { Theme } from "../theme";
+import { panel, type Theme } from "../theme";
 import type { SceneProps } from "./types";
 
 const Column: React.FC<{ title: string; points: { text: string }[]; reveals: number[]; color: string; theme: Theme; delay: number }> = ({
@@ -8,7 +8,7 @@ const Column: React.FC<{ title: string; points: { text: string }[]; reveals: num
 }) => {
   const card = useRise(delay, 60);
   return (
-    <div style={{ ...card, flex: 1, background: theme.card, borderRadius: 32, padding: 48, borderTop: `10px solid ${color}` }}>
+    <div style={{ ...card, ...panel(theme), flex: 1, borderRadius: 32, padding: 48, borderTop: `10px solid ${color}` }}>
       <div style={{ fontSize: 56, fontWeight: 800, color, marginBottom: 32 }}>{title}</div>
       {points.slice(0, 5).map((p, i) => (
         <Point key={i} text={p.text} at={reveals[i] ?? delay} color={color} theme={theme} />

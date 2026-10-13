@@ -1,8 +1,8 @@
 import { Composition } from "remotion";
 import demoPlan from "../../examples/demo-plan.json";
 import { VideoPlan, type RenderProps } from "../shared/schema";
-import { sfxFor } from "../shared/sfx";
-import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, sceneStarts, TRANSITION_FRAMES } from "../shared/timing";
+import { timeScenes } from "../shared/direct";
+import { estimateWordTimings, sceneStarts } from "../shared/timing";
 import { Explainer } from "./Explainer";
 
 // Studio default: the demo plan with estimated timings and no audio, so the
@@ -18,21 +18,14 @@ const preview: RenderProps = (() => {
     grade: plan.grade,
     music: null,
     images: {},
-    scenes: plan.scenes.map((s, i) => {
-      const duration = Math.max(1.5, s.narration.split(/\s+/).length / 2.5);
-      const words = estimateWordTimings(s.narration, duration);
-      const reveals = computeReveals(cuesOf(s.visual), words, duration, FPS);
-      return {
-        ...s,
-        audioFile: "",
-        audioDuration: duration,
-        durationInFrames: sceneFrames(duration, FPS),
-        words,
-        reveals,
-        transitionFrames: i === 0 ? 0 : TRANSITION_FRAMES[s.transition],
-        sfx: sfxFor(s.visual, s.transition, reveals, { isFirst: i === 0, isLast: i === plan.scenes.length - 1 }),
-      };
-    }),
+    scenes: timeScenes(
+      plan.scenes,
+      plan.scenes.map((s) => {
+        const duration = Math.max(1.5, s.narration.split(/\s+/).length / 2.5);
+        return { audioFile: "", audioDuration: duration, words: estimateWordTimings(s.narration, duration) };
+      }),
+      FPS,
+    ),
   };
 })();
 

@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { alignmentToWords } from "../pipeline/tts/elevenlabs";
-import { sfxFor } from "./sfx";
+import fs from "node:fs";
+import path from "node:path";
+import { direct } from "./direct";
+import { SFX_LIBRARY, sfxFor } from "./sfx";
 import { captionLines, captionPages, computeReveals, estimateWordTimings, findCue, LEAD_IN_SECONDS, sceneStarts } from "./timing";
 
 const words = "Your data is chopped into small packets, and each packet can take a different route."
@@ -69,9 +72,33 @@ test("sceneStarts subtracts transition overlaps", () => {
 
 test("sfxFor adds transition, reveal and finale sounds", () => {
   const visual = { type: "bullets" as const, heading: "h", points: [{ text: "a", cue: "a" }, { text: "b", cue: "b" }] };
-  const cues = sfxFor(visual, "whip", [30, 60], { isFirst: false, isLast: true });
-  assert.deepEqual(cues.map((c) => [c.name, c.frame]), [["whip", 0], ["pop", 30], ["pop", 60], ["ding", 66]]);
-  assert.equal(sfxFor(visual, "whip", [30], { isFirst: true, isLast: false })[0].name, "pop");
+  const cues = sfxFor(visual, "whip", [30, 60], { isFirst: false, isLast: true, seed: "s01" });
+  assert.deepEqual(cues.map((c) => [c.name, c.frame]), [["whip", 0], ["popIn", 30], ["popIn", 60], ["ding", 66], ["glass", 70]]);
+  assert.equal(sfxFor(visual, "whip", [30], { isFirst: true, isLast: false })[0].name, "popIn");
+});
+
+test("sfxFor rotates through a sound's variants within a scene", () => {
+  const visual = { type: "bullets" as const, heading: "h", points: [1, 2, 3].map((n) => ({ text: `${n}`, cue: `${n}` })) };
+  const files = sfxFor(visual, "cut", [10, 20, 30], { isFirst: true, isLast: false, seed: "s02" }).map((c) => c.file);
+  assert.equal(new Set(files).size, 3);
+});
+
+test("every sound in the library exists on disk", () => {
+  for (const [name, files] of Object.entries(SFX_LIBRARY)) {
+    assert.ok(files.length > 0, name);
+    for (const f of files) {
+      const p = f.startsWith("packs/") ? path.join("sound-packs", f.slice(6)) : path.join("assets/sfx", f);
+      assert.ok(fs.existsSync(p), `${name}: missing ${p}`);
+    }
+  }
+});
+
+test("direct never repeats a backdrop or camera move back to back", () => {
+  const b = { type: "bullets" as const, heading: "h", points: [] };
+  const picks = direct([{ visual: b }, { visual: b }, { visual: b }, { visual: b, background: "dots" as const }, { visual: b }]);
+  picks.forEach((p, i) => i > 0 && assert.notEqual(p.shot, picks[i - 1].shot));
+  picks.forEach((p, i) => i > 0 && assert.notEqual(p.background, picks[i - 1].background));
+  assert.equal(picks[3].background, "dots");
 });
 
 test("captionPages makes pages of at most 3 words, breaking at punctuation and pauses", () => {

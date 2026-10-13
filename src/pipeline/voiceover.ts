@@ -2,8 +2,8 @@
 // (the audio is the master clock, so visuals and captions can never drift).
 import path from "node:path";
 import type { TimedScene, VideoPlan } from "../shared/schema";
-import { sfxFor } from "../shared/sfx";
-import { computeReveals, cuesOf, estimateWordTimings, sceneFrames, TRANSITION_FRAMES } from "../shared/timing";
+import { timeScenes } from "../shared/direct";
+import { estimateWordTimings } from "../shared/timing";
 import { audioDuration } from "./media";
 import { FALLBACK_TTS, type TtsProvider } from "./tts";
 
@@ -53,7 +53,7 @@ export async function voiceOver(
       opts = { ...opts, voice: undefined };
     }
   }
-  return mapLimit(plan.scenes, tts.concurrency, async (scene, i) => {
+  const audio = await mapLimit(plan.scenes, tts.concurrency, async (scene, i) => {
     const base = path.join(jobDir, `scene-${String(i + 1).padStart(2, "0")}`);
     const res = await withRetry(() =>
       tts.synthesize(scene.narration, base, { language: plan.language, voice: opts.voice }),
@@ -61,17 +61,7 @@ export async function voiceOver(
     const duration = await audioDuration(res.audioPath);
     const words = res.words ?? estimateWordTimings(scene.narration, duration);
     opts.onProgress?.(++done, plan.scenes.length);
-    const reveals = computeReveals(cuesOf(scene.visual), words, duration, opts.fps);
-    const isFirst = i === 0;
-    return {
-      ...scene,
-      audioFile: path.basename(res.audioPath),
-      audioDuration: duration,
-      durationInFrames: sceneFrames(duration, opts.fps),
-      words,
-      reveals,
-      transitionFrames: isFirst ? 0 : TRANSITION_FRAMES[scene.transition],
-      sfx: sfxFor(scene.visual, scene.transition, reveals, { isFirst, isLast: i === plan.scenes.length - 1 }),
-    };
+    return { audioFile: path.basename(res.audioPath), audioDuration: duration, words };
   });
+  return timeScenes(plan.scenes, audio, opts.fps);
 }

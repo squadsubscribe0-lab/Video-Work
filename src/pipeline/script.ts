@@ -41,8 +41,11 @@ Visual rules:
 - "map": real coordinates only. "globe" for a global overview, "flat" for routes between places.
   Route endpoints must match point labels exactly.
 - "object3d": choose the model that best symbolises the idea (atom = physics/chemistry,
-  planet = space/earth, dna = biology/genetics, crystal = materials/value/energy,
-  network = internet/AI/connections, cube = data/building blocks/systems).
+  planet = space, globe = the whole world/global reach, dna = biology/genetics, crystal = materials/value,
+  network = internet/AI/connections, cube = data/building blocks/systems, lightbulb = ideas/inventions/electricity,
+  gears = machines/industry/how things work, rocket = launches/growth/space travel, coin = money/economy/cost,
+  lightning = electricity/power/energy, chip = computers/technology). Use 3D whenever a physical thing is discussed;
+  aim for one object3d every 5-6 scenes.
 - On-screen text is short (max ~8 words per item) and complements, not repeats, the narration.
 - "stat" only for real, well-known figures. Do not invent statistics or quotes; if unsure, use another visual.
 - "barChart" values must be numbers that are correct or clearly illustrative (say so in narration).
@@ -55,6 +58,16 @@ reveal, "shake" on an impact or shocking fact, "paperTear" into paper/collage sc
 newspaper, evidenceBoard), "split" or "spin" for a change of topic, "glitch" for tech/surprise,
 "iris" or "lightLeak" for calm or emotional moments, "fade" sparingly.
 Vary them; avoid the same transition twice in a row.
+
+Cinematography (this must feel like a film, not a slideshow):
+- "background": mostly black backdrops so everything pops. "warp" or "tunnel" for hooks and high energy,
+  "void" (spotlit black stage) for serious or 3D moments, "smoke" for mystery/history, "rays" for revelations,
+  "stars" for space/maps, "grid" for tech, "streaks"/"dots" for explanation scenes, "shapes3d" for abstract ideas,
+  "gradient" at most once. Never the same background twice in a row. You may omit it to let the editor choose.
+- "shot": the camera move. "snapZoom" on punchy beats, "push" to build tension, "pull" to reveal the big picture,
+  "truckLeft"/"truckRight" for lists and comparisons, "craneUp"/"craneDown" for scale, "orbit" for 3D-feeling
+  layouts, "dutch" for tension or conflict, "rackFocus" for a key sentence. Vary them; omit to let the editor choose.
+- The first two scenes are the cold open: hit hard immediately (title then kinetic, with "flash" or "cut").
 
 Pick the theme and colour grade that fit the topic's mood.`;
 

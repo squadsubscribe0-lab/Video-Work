@@ -47,8 +47,10 @@ but needs internet; `--tts elevenlabs` needs `ELEVENLABS_API_KEY`.
 - Each scene has a `transition` (how it enters). Overlap lengths live in `TRANSITION_FRAMES`
   (`src/shared/timing.ts`); `cut`/`flash`/`lightLeak` don't overlap and are drawn by `EntryOverlay`.
   Visuals live in `src/remotion/transitions.tsx`.
-- Sound effects are chosen by `sfxFor()` in `src/shared/sfx.ts` (transition sound at frame 0, a sound per
-  reveal, riser+boom for stats, ding on the finale). Files are in `assets/sfx/` and copied into each job.
+- Sound effects are chosen by `sfxFor()` in `src/shared/sfx.ts`. Each name maps to a pool of files in
+  `SFX_LIBRARY` (`sound-packs/` Kenney packs + `assets/sfx/` hits); only the files a video uses are copied into the job.
+- `src/shared/direct.ts` resolves each scene's `background` (backdrop, `components/Backdrops.tsx`) and `shot`
+  (camera move, `shotPose()` in `components/Cinematic.tsx`) when the plan leaves them out, and finds jump cuts.
 - Music: `src/pipeline/music.ts` (generated pad or `--music file`), ducked under the voice in `Explainer.tsx`.
 - Camera/lens: `src/remotion/components/Cinematic.tsx` (push-in, punch on reveals, letterbox, grain, vignette).
 - 3D scenes use `@remotion/three`: animate only from `useCurrentFrame()`, never `useFrame()`.

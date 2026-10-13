@@ -3,39 +3,27 @@ import { TransitionSeries } from "@remotion/transitions";
 import { Fragment, useMemo } from "react";
 import { AbsoluteFill, Sequence, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { CaptionStyle, RenderProps, TimedScene } from "../shared/schema";
+import { OWN_BACKDROP } from "../shared/direct";
 import { LEAD_IN_SECONDS, sceneStarts } from "../shared/timing";
 import { useSceneFade } from "./anim";
-import { Background } from "./components/Background";
+import { Backdrop } from "./components/Backdrops";
 import { BoldCaptions } from "./components/BoldCaptions";
 import { Captions } from "./components/Captions";
-import { CameraRig, Lens, Letterbox } from "./components/Cinematic";
+import { CameraRig, DepthDust, Lens, Letterbox } from "./components/Cinematic";
 import { gradeFilter, GradeOverlay } from "./components/Grade";
 import { ImagesContext } from "./components/Photo";
 import { SceneVisual } from "./scenes";
 import { FONT, THEMES, type Theme } from "./theme";
 import { EntryOverlay, presentationFor, timingFor } from "./transitions";
 
-const LETTERBOX = new Set(["title", "quote", "kinetic"]);
-// Scenes with their own camera choreography don't get editor jump cuts.
-const NO_JUMP_CUTS = new Set(["title", "kinetic", "map", "object3d", "evidenceBoard", "newspaper", "dossier"]);
-// Full-bleed scenes draw their own backdrop.
-const OWN_BACKDROP = new Set(["photo", "dossier", "newspaper", "evidenceBoard"]);
+const LETTERBOX = new Set(["title", "quote", "kinetic", "object3d"]);
 
-/** Cut points for jump cuts: after sentence ends, at most one every ~2.5 s. */
-function jumpCuts(scene: TimedScene, fps: number): number[] {
-  if (NO_JUMP_CUTS.has(scene.visual.type)) return [];
-  const cuts: number[] = [];
-  let last = 0;
-  scene.words.forEach((w, i) => {
-    const next = scene.words[i + 1];
-    if (!next || !/[.!?,;:।]$/.test(w.text)) return;
-    const f = Math.round((next.start + LEAD_IN_SECONDS) * fps) - 1;
-    if (f - last >= fps * 2.5 && f < scene.durationInFrames - fps) {
-      cuts.push(f);
-      last = f;
-    }
-  });
-  return cuts;
+/** Frames that get an RGB-split impact hit: slammed words, locked numbers, impact cuts. */
+function impactHits(scene: TimedScene, index: number): number[] {
+  const hits = scene.visual.type === "kinetic" ? [...scene.reveals] : scene.visual.type === "stat" ? [45] : [];
+  if (index > 0 && (scene.transition === "shake" || scene.transition === "flash" || scene.transition === "glitch")) hits.push(0);
+  if (scene.visual.type === "title") hits.push(2);
+  return hits;
 }
 
 const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; captions: CaptionStyle; isLast: boolean }> = ({
@@ -48,7 +36,7 @@ const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; cap
   const exitOpacity = isLast ? fade : 1;
   return (
     <AbsoluteFill style={{ opacity: exitOpacity }}>
-      {OWN_BACKDROP.has(scene.visual.type) ? null : <Background theme={theme} />}
+      {OWN_BACKDROP.has(scene.visual.type) ? null : <Backdrop name={scene.background ?? "void"} theme={theme} />}
       {scene.audioFile ? (
         <Sequence from={Math.round(LEAD_IN_SECONDS * fps)} premountFor={fps}>
           <Audio src={staticFile(scene.audioFile)} />
@@ -56,21 +44,26 @@ const SceneBlock: React.FC<{ scene: TimedScene; index: number; theme: Theme; cap
       ) : null}
       {scene.sfx.map((s, i) => (
         <Sequence key={i} from={s.frame} premountFor={fps}>
-          <Audio src={staticFile(`sfx/${s.name}.mp3`)} volume={s.volume} />
+          <Audio src={staticFile(s.file)} volume={s.volume} />
         </Sequence>
       ))}
       <CameraRig
         durationInFrames={scene.durationInFrames}
         reveals={scene.reveals}
         seed={scene.id}
-        cuts={jumpCuts(scene, fps)}
+        shot={scene.shot ?? "push"}
+        cuts={scene.cuts ?? []}
         shake={index > 0 && scene.transition === "shake"}
+        hits={impactHits(scene, index)}
       >
         <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", paddingBottom: showCaptions && !OWN_BACKDROP.has(scene.visual.type) ? 160 : 0 }}>
           <SceneVisual visual={scene.visual} reveals={scene.reveals} theme={theme} durationInFrames={scene.durationInFrames} />
         </AbsoluteFill>
       </CameraRig>
-      {LETTERBOX.has(scene.visual.type) ? <Letterbox durationInFrames={scene.durationInFrames} /> : null}
+      {OWN_BACKDROP.has(scene.visual.type) ? null : (
+        <DepthDust shot={scene.shot ?? "push"} durationInFrames={scene.durationInFrames} seed={scene.id} color={theme.accent} />
+      )}
+      {LETTERBOX.has(scene.visual.type) ? <Letterbox durationInFrames={scene.durationInFrames} instant={index === 0} /> : null}
       {captions === "bold" ? <BoldCaptions words={scene.words} theme={theme} /> : null}
       {captions === "subtle" ? <Captions words={scene.words} theme={theme} /> : null}
       {index > 0 ? <EntryOverlay transition={scene.transition} accent={theme.accent} accent2={theme.accent2} /> : null}
@@ -82,7 +75,7 @@ const ProgressBar: React.FC<{ theme: Theme }> = ({ theme }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   return (
-    <div style={{ position: "absolute", left: 0, bottom: 0, height: 8, width: `${(frame / durationInFrames) * 100}%`, background: theme.accent }} />
+    <div style={{ position: "absolute", left: 0, bottom: 0, height: 4, width: `${(frame / durationInFrames) * 100}%`, background: theme.accent, opacity: 0.8 }} />
   );
 };
 
@@ -110,13 +103,13 @@ function useDucking(scenes: TimedScene[], fps: number) {
   }, [scenes, fps]);
 }
 
-export const Explainer: React.FC<RenderProps> = ({ title, theme: themeName, scenes, captions, music, grade, images }) => {
+export const Explainer: React.FC<RenderProps> = ({ theme: themeName, scenes, captions, music, grade, images }) => {
   const { fps, width, height } = useVideoConfig();
   const theme = THEMES[themeName] ?? THEMES.midnight;
   const musicVolume = useDucking(scenes, fps);
   return (
     <ImagesContext.Provider value={images ?? {}}>
-    <AbsoluteFill style={{ fontFamily: FONT, color: theme.text, background: theme.bg1 }}>
+    <AbsoluteFill style={{ fontFamily: FONT, color: theme.text, background: "#000" }}>
       <AbsoluteFill style={{ filter: gradeFilter(grade) }}>
       <TransitionSeries>
         {scenes.map((scene, i) => {
@@ -136,7 +129,6 @@ export const Explainer: React.FC<RenderProps> = ({ title, theme: themeName, scen
       </AbsoluteFill>
       <GradeOverlay grade={grade} />
       {music ? <Audio src={staticFile(music)} volume={musicVolume} /> : null}
-      <div style={{ position: "absolute", top: 40, left: 56, fontSize: 26, fontWeight: 700, color: theme.muted, opacity: 0.7 }}>{title}</div>
       <Lens />
       <ProgressBar theme={theme} />
     </AbsoluteFill>

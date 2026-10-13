@@ -9,6 +9,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { VideoPlan, type CaptionStyle, type RenderProps } from "../shared/schema";
+import { sfxFilesOf } from "../shared/sfx";
 import { sceneStarts } from "../shared/timing";
 import { researchImages } from "./images";
 import { prepareMusic } from "./music";
@@ -56,6 +57,16 @@ Options:
   process.exit(prompt || values.plan ? 0 : 1);
 }
 
+/** Copies the sound effects the edit uses into the job (cinematic hits + Kenney packs). */
+async function copySfx(files: string[], jobDir: string) {
+  for (const file of files) {
+    const rel = file.replace(/^sfx\//, "");
+    const src = rel.startsWith("packs/") ? path.resolve("sound-packs", rel.slice("packs/".length)) : path.resolve("assets/sfx", rel);
+    await fs.mkdir(path.dirname(path.join(jobDir, file)), { recursive: true });
+    await fs.copyFile(src, path.join(jobDir, file));
+  }
+}
+
 const slug = (s: string) =>
   s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 40) || "video";
 
@@ -92,7 +103,7 @@ async function main() {
   process.stdout.write("\n");
 
   const total = sceneStarts(scenes).total / fps;
-  await fs.cp(path.resolve("assets/sfx"), path.join(jobDir, "sfx"), { recursive: true });
+  await copySfx(sfxFilesOf(scenes), jobDir);
   // Music is a nice-to-have: if it can't be made, render without it.
   const music = await prepareMusic(jobDir, total, values.music!).catch((err: Error) => {
     console.warn(`⚠️  No background music: ${err.message.split("\n").pop()}`);

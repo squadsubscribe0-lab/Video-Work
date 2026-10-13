@@ -1,6 +1,6 @@
 import { spring, useCurrentFrame, useVideoConfig } from "remotion";
 import { DISPLAY_FONT } from "../fonts";
-import type { Theme } from "../theme";
+import { emboss, type Theme } from "../theme";
 
 // Section heading: words rise out of a mask one after another, then the accent bar
 // wipes in underneath.
@@ -13,7 +13,7 @@ export const Heading: React.FC<{ text: string; theme: Theme; center?: boolean }>
     <div style={{ marginBottom: 56 }}>
       <div
         style={{
-          fontFamily: DISPLAY_FONT, fontSize: 76, fontWeight: 900, color: theme.text, letterSpacing: -1.5, lineHeight: 1.1,
+          fontFamily: DISPLAY_FONT, fontSize: 76, fontWeight: 900, color: theme.text, letterSpacing: -1.5, lineHeight: 1.1, textShadow: emboss(theme),
           display: "flex", flexWrap: "wrap", gap: "0 22px", justifyContent: center ? "center" : "flex-start",
         }}
       >
