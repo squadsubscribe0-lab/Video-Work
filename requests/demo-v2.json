@@ -1,0 +1,7 @@
+{
+  "plan": "examples/demo-plan.json",
+  "tts": "edge",
+  "captions": true,
+  "minutes": 2,
+  "voice": "en-US-AndrewMultilingualNeural"
+}
