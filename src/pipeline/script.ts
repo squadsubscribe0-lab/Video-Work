@@ -71,14 +71,38 @@ Cinematography (this must feel like a film, not a slideshow):
 
 Pick the theme and colour grade that fit the topic's mood.`;
 
-export async function writeScript(
-  prompt: string,
-  opts: { minutes: number; language: string },
-): Promise<VideoPlan> {
-  const client = new Anthropic();
-  const words = Math.round(opts.minutes * WORDS_PER_MINUTE);
-  const scenes = Math.max(4, Math.round((opts.minutes * 60) / 18));
+/** Normalised words, for checking that a split kept the user's script intact. */
+const wordsOf = (s: string) => s.toLowerCase().normalize("NFKC").split(/\s+/).map((w) => w.replace(/[^\p{L}\p{M}\p{N}]+/gu, "")).filter(Boolean);
 
+/**
+ * The user's own finished script -> VideoPlan. Claude only directs: it splits the text
+ * into scenes and picks visuals, transitions, backdrops and shots. Narration is kept
+ * word for word.
+ */
+export async function planFromScript(title: string, script: string, opts: { language: string }): Promise<VideoPlan> {
+  const total = wordsOf(script).length;
+  const user =
+    `Video title: ${title}\n\n` +
+    `The narration is already written. Direct it: split it into scenes (~${Math.max(4, Math.round(total / 28))} scenes, 15-40 words each) ` +
+    `and design each scene's visual. RULES FOR THIS TASK:\n` +
+    `- Each scene's "narration" must be a consecutive chunk of the script copied EXACTLY, word for word. ` +
+    `Joined in order, the scenes must reproduce the whole script with nothing added, removed or reworded.\n` +
+    `- The first scene is "title" with heading = the video title.\n` +
+    `- Narration language: ${opts.language}. On-screen text in the same language.\n\n` +
+    `SCRIPT:\n${script}`;
+  const plan = await callPlanner(user);
+  plan.title = title;
+  const got = wordsOf(plan.scenes.map((s) => s.narration).join(" ")).join(" ");
+  if (got !== wordsOf(script).join(" ")) {
+    console.warn("   ⚠️  The scene split changed some words of the script; using the offline splitter so your script stays exact");
+    const { heuristicPlan } = await import("./fromScript");
+    return heuristicPlan(title, script, opts);
+  }
+  return plan;
+}
+
+async function callPlanner(content: string): Promise<VideoPlan> {
+  const client = new Anthropic();
   const stream = client.beta.messages.stream({
     model: MODEL,
     max_tokens: 64000,
@@ -86,17 +110,8 @@ export async function writeScript(
     fallbacks: "default",
     output_config: { effort: "high", format: betaZodOutputFormat(VideoPlan) },
     system: SYSTEM,
-    messages: [
-      {
-        role: "user",
-        content:
-          `Topic / brief: ${prompt}\n\n` +
-          `Target length: about ${opts.minutes} minutes (~${words} narration words, ~${scenes} scenes).\n` +
-          `Narration language: ${opts.language}. Write narration and on-screen text in that language.`,
-      },
-    ],
+    messages: [{ role: "user", content }],
   });
-
   const message = await stream.finalMessage();
   if (message.stop_reason === "refusal") {
     throw new Error(`The model declined to write this script (${message.stop_details?.category ?? "no category"}).`);
@@ -106,4 +121,17 @@ export async function writeScript(
   }
   const text = message.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
   return VideoPlan.parse(JSON.parse(text));
+}
+
+export async function writeScript(
+  prompt: string,
+  opts: { minutes: number; language: string },
+): Promise<VideoPlan> {
+  const words = Math.round(opts.minutes * WORDS_PER_MINUTE);
+  const scenes = Math.max(4, Math.round((opts.minutes * 60) / 18));
+  return callPlanner(
+    `Topic / brief: ${prompt}\n\n` +
+      `Target length: about ${opts.minutes} minutes (~${words} narration words, ~${scenes} scenes).\n` +
+      `Narration language: ${opts.language}. Write narration and on-screen text in that language.`,
+  );
 }

@@ -14,7 +14,8 @@ import { sceneStarts } from "../shared/timing";
 import { researchImages } from "./images";
 import { prepareMusic } from "./music";
 import { renderVideo } from "./render";
-import { writeScript } from "./script";
+import { heuristicPlan } from "./fromScript";
+import { planFromScript, writeScript } from "./script";
 import { getTts } from "./tts";
 import { voiceOver } from "./voiceover";
 
@@ -26,6 +27,9 @@ const { values, positionals } = parseArgs({
     tts: { type: "string", default: "edge" },
     voice: { type: "string" },
     plan: { type: "string" },
+    title: { type: "string" },
+    "script-file": { type: "string" },
+    theme: { type: "string" },
     "job-dir": { type: "string" },
     fps: { type: "string", default: "30" },
     captions: { type: "string", default: "bold" },
@@ -37,10 +41,12 @@ const { values, positionals } = parseArgs({
 });
 
 const prompt = positionals.join(" ").trim();
-if (values.help || (!prompt && !values.plan)) {
+const hasInput = Boolean(prompt || values.plan || values["script-file"]);
+if (values.help || !hasInput) {
   console.log(`Usage:
   npm run make -- "<topic or brief>" [options]
   npm run make -- --plan <plan.json> [options]
+  npm run make -- --title "<title>" --script-file <script.txt> [options]
 
 Options:
   --minutes <n>      Target length (default 2)
@@ -48,13 +54,16 @@ Options:
   --tts <name>       edge (free, default) | elevenlabs | mock (silent, offline)
   --voice <id>       Voice name/id for the TTS provider
   --plan <file>      Skip script writing and use an existing plan.json
+  --script-file <f>  Use your own finished narration (kept word for word); needs --title
+  --title <text>     Video title (with --script-file)
+  --theme <name>     Force a colour theme: midnight | sunset | ocean | forest
   --job-dir <dir>    Where to write the job (default jobs/<timestamp>-<title>)
   --fps <n>          Frames per second (default 30)
   --captions <style> bold (big word-by-word, default) | subtle | none
   --no-captions      Same as --captions none
   --music <file>     Background music file, "auto" (generated pad, default) or "none"
   --skip-render      Stop after voice-over (preview in Remotion Studio instead)`);
-  process.exit(prompt || values.plan ? 0 : 1);
+  process.exit(hasInput ? 0 : 1);
 }
 
 /** Copies the sound effects the edit uses into the job (cinematic hits + Kenney packs). */
@@ -78,11 +87,24 @@ async function main() {
   if (values.plan) {
     plan = VideoPlan.parse(JSON.parse(await fs.readFile(values.plan, "utf8")));
     console.log(`📄 Using plan ${values.plan} (${plan.scenes.length} scenes)`);
+  } else if (values["script-file"]) {
+    const script = (await fs.readFile(values["script-file"], "utf8")).trim();
+    const title = values.title?.trim() || script.split(/[.!?\n]/)[0].slice(0, 60);
+    if (process.env.ANTHROPIC_API_KEY) {
+      console.log("✍️  Directing your script with Claude (scenes, visuals, camera)...");
+      plan = await planFromScript(title, script, { language: values.language! });
+    } else {
+      console.log("✍️  Directing your script (offline director: no ANTHROPIC_API_KEY)...");
+      plan = heuristicPlan(title, script, { language: values.language! });
+    }
+    console.log(`   "${plan.title}" - ${plan.scenes.length} scenes`);
   } else {
     console.log(`✍️  Writing script with Claude (~${values.minutes} min, ${values.language})...`);
     plan = await writeScript(prompt, { minutes: Number(values.minutes), language: values.language! });
     console.log(`   "${plan.title}" - ${plan.scenes.length} scenes`);
   }
+
+  if (values.theme) plan.theme = VideoPlan.shape.theme.parse(values.theme);
 
   const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   const jobDir = path.resolve(values["job-dir"] ?? path.join("jobs", `${stamp}-${slug(plan.title)}`));

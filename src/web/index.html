@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Studio</title>
+<style>
+  :root {
+    --bg: #050506; --panel: #0e0e11; --panel2: #15151a; --line: #24242c; --text: #f3f3f6; --muted: #9a9aa8;
+    --accent: #ff9f43; --accent2: #ff5e7e; --ok: #4ade80; --bad: #f87171; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(ellipse 60% 40% at 50% -10%, #ff9f4318, transparent 70%), var(--bg);
+  }
+  header { max-width: 1200px; margin: 0 auto; padding: 28px 20px 8px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 26px; letter-spacing: -0.5px; }
+  header h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .mode { font-size: 13px; color: var(--muted); }
+  main { max-width: 1200px; margin: 0 auto; padding: 12px 16px 60px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 20px; }
+  @media (max-width: 900px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .card { background: linear-gradient(180deg, #ffffff08, #ffffff02), var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: inset 0 1px 0 #ffffff12, 0 20px 50px #000a; }
+  .card h2 { margin: 0 0 14px; font-size: 15px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); font-weight: 600; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+  label:first-of-type { margin-top: 0; }
+  input, select, textarea {
+    width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+    padding: 11px 12px; font: inherit; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #ff9f4322; }
+  textarea { min-height: 300px; resize: vertical; line-height: 1.6; }
+  .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+  .counter { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 6px 0 4px; }
+  button {
+    font: inherit; font-weight: 700; border: 0; border-radius: 10px; padding: 13px 18px; cursor: pointer; color: #120800;
+    background: linear-gradient(90deg, var(--accent), var(--accent2)); box-shadow: 0 10px 30px #ff7a5a33;
+  }
+  button:disabled { opacity: 0.5; cursor: progress; }
+  button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); box-shadow: none; font-weight: 600; padding: 8px 12px; }
+  .actions { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+  .error { color: var(--bad); font-size: 14px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 10px; }
+  .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 4px 0 14px; }
+  .step { font-size: 12px; color: var(--muted); padding: 8px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line); text-align: center; }
+  .step.active { color: var(--text); border-color: var(--accent); box-shadow: 0 0 20px #ff9f4322; }
+  .step.done { color: var(--ok); }
+  .bar { height: 8px; border-radius: 4px; background: var(--panel2); overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.6s ease; }
+  .status { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; font-size: 14px; }
+  .jobtitle { font-size: 18px; font-weight: 700; margin-bottom: 8px; overflow-wrap: anywhere; }
+  video { width: 100%; border-radius: 10px; background: #000; margin-top: 10px; display: block; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  pre { background: #000; border: 1px solid var(--line); border-radius: 8px; padding: 10px; max-height: 240px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-break: break-word; color: #c9c9d4; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+  .item:hover, .item.sel { border-color: var(--accent); }
+  .item .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pill { font-size: 11px; padding: 3px 8px; border-radius: 99px; background: #ffffff10; color: var(--muted); white-space: nowrap; }
+  .pill.done { color: var(--ok); } .pill.failed, .pill.cancelled { color: var(--bad); } .pill.run { color: var(--accent); }
+  .side { display: flex; flex-direction: column; gap: 20px; }
+  a.dl { color: var(--accent); font-weight: 700; text-decoration: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎬 Video <span>Studio</span></h1>
+  <div class="mode" id="mode"></div>
+</header>
+<main>
+  <form class="card" id="form" autocomplete="off">
+    <h2>Your video</h2>
+    <label for="title">Title</label>
+    <input id="title" name="title" maxlength="140" placeholder="The Man Who Lit the World" required>
+
+    <label for="script">Script (the narration, word for word)</label>
+    <textarea id="script" name="script" placeholder="Paste your script here. Every word you write is spoken by the narrator; the studio splits it into scenes and designs the visuals, camera moves, music and sound effects." required></textarea>
+    <div class="counter"><span id="words">0 words</span><span id="length">~0:00 of video</span></div>
+
+    <div class="row">
+      <div>
+        <label for="language">Language</label>
+        <select id="language" name="language">
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="ur-PK">Urdu</option>
+          <option value="ar-SA">Arabic</option>
+          <option value="es-ES">Spanish</option>
+          <option value="fr-FR">French</option>
+          <option value="de-DE">German</option>
+        </select>
+      </div>
+      <div>
+        <label for="tts">Voice engine</label>
+        <select id="tts" name="tts">
+          <option value="edge">Edge voices (free, online)</option>
+          <option value="elevenlabs">ElevenLabs (API key)</option>
+          <option value="kokoro">Kokoro (free, offline, English)</option>
+          <option value="mock">Silent test (no voice)</option>
+        </select>
+      </div>
+      <div>
+        <label for="captions">Captions</label>
+        <select id="captions" name="captions">
+          <option value="bold">Bold word-by-word</option>
+          <option value="subtle">Subtle</option>
+          <option value="none">None</option>
+        </select>
+      </div>
+      <div>
+        <label for="theme">Colour theme</label>
+        <select id="theme" name="theme">
+          <option value="auto">Auto</option>
+          <option value="sunset">Sunset (orange / pink)</option>
+          <option value="midnight">Midnight (blue / pink)</option>
+          <option value="ocean">Ocean (teal / blue)</option>
+          <option value="forest">Forest (green / gold)</option>
+        </select>
+      </div>
+    </div>
+    <label for="voice">Voice name (optional)</label>
+    <input id="voice" name="voice" placeholder="e.g. en-US-AndrewMultilingualNeural">
+    <div class="hint">Leave empty for the default voice of the language.</div>
+
+    <div class="actions">
+      <button type="submit" id="go">Create video</button>
+      <span class="error" id="formError" role="alert"></span>
+    </div>
+  </form>
+
+  <div class="side">
+    <section class="card" id="job" aria-live="polite">
+      <h2>Progress</h2>
+      <div class="empty" id="jobEmpty">Paste a script and press <b>Create video</b>.</div>
+      <div id="jobBody" hidden>
+        <div class="jobtitle" id="jobTitle"></div>
+        <div class="steps" id="steps"></div>
+        <div class="bar"><div id="bar"></div></div>
+        <div class="status"><span id="detail"></span><span id="pct"></span></div>
+        <div class="error" id="jobError"></div>
+        <div id="result"></div>
+        <div class="actions" style="margin-top:8px"><button class="ghost" id="cancel" type="button" hidden>Cancel</button></div>
+        <details><summary>Log</summary><pre id="log"></pre></details>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Your videos</h2>
+      <div class="list" id="list"><div class="empty" style="padding:16px">None yet.</div></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const STEPS = [["script", "Directing"], ["images", "Images"], ["voice", "Voice-over"], ["render", "Rendering"], ["done", "Done"]];
+const ORDER = STEPS.map((s) => s[0]);
+let current = null;
+let timer = null;
+
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// Live word count and length estimate (~150 spoken words per minute).
+function count() {
+  const n = $("script").value.trim().split(/\s+/).filter(Boolean).length;
+  const secs = Math.round((n / 150) * 60);
+  $("words").textContent = `${n} words`;
+  $("length").textContent = `~${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")} of video`;
+}
+$("script").addEventListener("input", count);
+
+// Keep the draft if the tab is closed.
+try {
+  const draft = JSON.parse(localStorage.getItem("draft") || "{}");
+  for (const k of ["title", "script", "language", "tts", "captions", "theme", "voice"]) if (draft[k]) $(k).value = draft[k];
+} catch {}
+$("form").addEventListener("input", () => {
+  try { localStorage.setItem("draft", JSON.stringify(Object.fromEntries(new FormData($("form"))))); } catch {}
+});
+count();
+
+fetch("/api/config").then((r) => r.json()).then((c) => {
+  $("mode").textContent = c.claude
+    ? "Claude directs your script: scenes, visuals, camera, 3D"
+    : "Offline director (set ANTHROPIC_API_KEY for Claude-directed scenes)";
+});
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("formError").textContent = "";
+  const body = Object.fromEntries(new FormData($("form")));
+  if (!body.voice) delete body.voice;
+  $("go").disabled = true;
+  try {
+    const res = await fetch("/api/jobs", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Could not start");
+    select(data.id);
+    loadList();
+  } catch (err) {
+    $("formError").textContent = err.message;
+  } finally {
+    $("go").disabled = false;
+  }
+});
+
+$("cancel").addEventListener("click", async () => {
+  if (current && confirm("Stop making this video?")) {
+    await fetch(`/api/jobs/${current}/cancel`, { method: "POST" });
+    poll();
+  }
+});
+
+function select(id) {
+  current = id;
+  clearTimeout(timer);
+  $("result").innerHTML = "";
+  $("result").dataset.id = "";
+  poll();
+}
+
+async function poll() {
+  if (!current) return;
+  const id = current;
+  try {
+    const res = await fetch(`/api/jobs/${id}`);
+    if (!res.ok) throw new Error("gone");
+    render(await res.json());
+  } catch {}
+  if (id === current) timer = setTimeout(poll, 1500);
+}
+
+function render(job) {
+  $("jobEmpty").hidden = true;
+  $("jobBody").hidden = false;
+  $("jobTitle").textContent = job.title;
+  const at = ORDER.indexOf(job.stage);
+  $("steps").innerHTML = STEPS.map(([k, label], i) => {
+    const cls = job.stage === "done" || (at > i) ? "done" : at === i ? "active" : "";
+    return `<div class="step ${cls}">${label}</div>`;
+  }).join("");
+  const pct = Math.round(job.progress * 100);
+  $("bar").style.width = `${pct}%`;
+  $("pct").textContent = job.stage === "queued" ? `#${job.queuePosition} in queue` : `${pct}%`;
+  $("detail").textContent = job.detail || "";
+  $("jobError").textContent = job.error || "";
+  $("cancel").hidden = !["queued", "script", "images", "voice", "render"].includes(job.stage);
+  const log = $("log");
+  const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 10;
+  log.textContent = (job.log || []).join("\n");
+  if (atBottom) log.scrollTop = log.scrollHeight;
+  if (job.video && $("result").dataset.id !== job.id) {
+    $("result").dataset.id = job.id;
+    $("result").innerHTML = `<video controls preload="metadata" src="${esc(job.video)}"></video>
+      <div class="actions"><a class="dl" href="${esc(job.video)}?download">⬇ Download MP4</a></div>`;
+    loadList();
+  }
+  if (["done", "failed", "cancelled"].includes(job.stage)) {
+    clearTimeout(timer);
+    loadList();
+  }
+}
+
+const PILL = { done: "Ready", failed: "Failed", cancelled: "Cancelled", queued: "Queued" };
+async function loadList() {
+  try {
+    const jobs = await (await fetch("/api/jobs")).json();
+    if (!jobs.length) return;
+    $("list").innerHTML = jobs.map((j) => {
+      const label = PILL[j.stage] || `${Math.round(j.progress * 100)}%`;
+      const cls = PILL[j.stage] ? j.stage : "run";
+      return `<div class="item ${j.id === current ? "sel" : ""}" data-id="${esc(j.id)}" role="button" tabindex="0">
+        <span class="t">${esc(j.title)}</span><span class="pill ${cls}">${esc(label)}</span></div>`;
+    }).join("");
+    if (!current) {
+      const active = jobs.find((j) => !["done", "failed", "cancelled"].includes(j.stage));
+      if (active) select(active.id);
+    }
+  } catch {}
+}
+$("list").addEventListener("click", (e) => {
+  const item = e.target.closest(".item");
+  if (item) { select(item.dataset.id); loadList(); }
+});
+$("list").addEventListener("keydown", (e) => {
+  const item = e.target.closest(".item");
+  if (item && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); select(item.dataset.id); loadList(); }
+});
+loadList();
+setInterval(loadList, 5000);
+</script>
+</body>
+</html>

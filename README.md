@@ -13,6 +13,26 @@ npm run make -- "Why do we dream?" --minutes 3
 # ✅ Done: jobs/20261011-why-do-we-dream/video.mp4
 ```
 
+## Web page: paste a title + script, get a video
+
+```bash
+npm install
+npm run web          # open http://localhost:3000
+```
+
+Paste your title and script (the narration, word for word), pick language, voice, captions and
+theme, and press **Create video**. The page shows each step live (directing → images →
+voice-over → rendering), then plays the video with a download button. Earlier videos stay listed.
+
+- With `ANTHROPIC_API_KEY` set, Claude directs your script: it splits it into scenes and picks the
+  visuals, 3D models, backdrops, camera moves and transitions. Your words are never changed.
+- Without a key, the built-in offline director does the split and picks visuals from the text.
+- One video renders at a time; others wait in a queue. Files land in `jobs/web-*/`.
+- `PORT=8080 npm run web` changes the port. `HOST=0.0.0.0` exposes it on your network; the page
+  has no login, so only do that on a network you trust.
+
+The same works from the terminal: `npm run make -- --title "My title" --script-file script.txt`.
+
 ## Run it on GitHub (no setup on your computer)
 
 1. Repo **Settings → Secrets and variables → Actions → New repository secret**:
