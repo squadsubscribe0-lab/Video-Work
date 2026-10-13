@@ -1,0 +1,7 @@
+node_modules/
+jobs/
+out/
+.env
+# Skills fetched by scripts/install-skills.sh (Remotion License / unlicensed upstream)
+.claude/skills/remotion-*/
+.claude/skills/motion-designer/

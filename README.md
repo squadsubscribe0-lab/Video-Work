@@ -1,0 +1,154 @@
+# Video-Work: prompt → YouTube explainer video
+
+Give it a topic. It writes the script, records the voice-over, animates motion-graphics,
+map and 3D scenes, cuts them together with cinematic transitions, lays sound effects and
+a music bed under it, syncs everything to the voice word by word, and renders an MP4.
+
+Needs Node 22+ and ffmpeg (`brew install ffmpeg` / `sudo apt install ffmpeg`).
+
+```bash
+npm install
+export ANTHROPIC_API_KEY=sk-ant-...
+npm run make -- "Why do we dream?" --minutes 3
+# ✅ Done: jobs/20261011-why-do-we-dream/video.mp4
+```
+
+## Online studio (GitHub Pages): no computer needed
+
+**https://squadsubscribe0-lab.github.io/Video-Work/**: paste a title and script, press **Create video**.
+The page starts the "Make video" GitHub Action, follows it live, then plays the finished video
+(published as a release `video-web-…`) with a download button. All videos are listed on the page.
+
+One-time setup:
+1. **Settings → Pages → Build and deployment → Source: GitHub Actions** (the `Publish web studio`
+   workflow then deploys `site/` on every push to `main`).
+2. Create a [fine-grained token](https://github.com/settings/personal-access-tokens/new) for this repo
+   with **Actions: Read and write**, open the page, press **Connect GitHub** and paste it. It is stored only
+   in your browser.
+3. Optional: add the `ANTHROPIC_API_KEY` secret (Settings → Secrets → Actions) so Claude directs the
+   scenes; without it the offline director is used.
+
+## Web page on your own computer
+
+```bash
+npm install
+npm run web          # open http://localhost:3000
+```
+
+Paste your title and script (the narration, word for word), pick language, voice, captions and
+theme, and press **Create video**. The page shows each step live (directing → images →
+voice-over → rendering), then plays the video with a download button. Earlier videos stay listed.
+
+- With `ANTHROPIC_API_KEY` set, Claude directs your script: it splits it into scenes and picks the
+  visuals, 3D models, backdrops, camera moves and transitions. Your words are never changed.
+- Without a key, the built-in offline director does the split and picks visuals from the text.
+- One video renders at a time; others wait in a queue. Files land in `jobs/web-*/`.
+- `PORT=8080 npm run web` changes the port. `HOST=0.0.0.0` exposes it on your network; the page
+  has no login, so only do that on a network you trust.
+
+The same works from the terminal: `npm run make -- --title "My title" --script-file script.txt`.
+
+## Run it on GitHub (no setup on your computer)
+
+1. Repo **Settings → Secrets and variables → Actions → New repository secret**:
+   `ANTHROPIC_API_KEY` (and optionally `ELEVENLABS_API_KEY`).
+2. **Actions → Make video → Run workflow**, type the topic, press Run.
+   Or commit a file to `requests/` (see [requests/README.md](requests/README.md)), which also works from the GitHub mobile app.
+3. When the run finishes, download the MP4 from the run's **Artifacts** section.
+
+## How it works
+
+```
+"Why do we dream?"
+   │
+   ▼  1. Script      Claude writes a scene-by-scene plan (narration + visual + cue words)
+plan.json
+   │
+   ▼  2. Voice-over  TTS for each scene + word timings (Edge TTS free / ElevenLabs)
+scene-NN.mp3 + props.json   ← audio is the master clock, every reveal is a frame number
+   │
+   ▼  3. Render      Remotion animates the scenes in React, mixes the audio, burns in captions
+video.mp4
+```
+
+| Folder | What's there |
+|---|---|
+| `src/pipeline/` | CLI, Claude script writer, TTS providers, render step |
+| `src/remotion/` | The video: composition, 9 scene types, background, captions, themes |
+| `src/shared/` | Plan schema (zod), timing/sync logic, the "director" (backdrop + shot picks, jump cuts) and sound design (with tests) |
+| `sound-packs/` | CC0 Kenney sound packs used by the sound design |
+| `examples/demo-plan.json` | A complete 2-minute sample plan |
+| `.claude/skills/` | Agent skills gathered from GitHub + this repo's own `explainer-video` skill ([docs/SKILLS.md](docs/SKILLS.md)) |
+
+## Options
+
+```bash
+npm run make -- "<topic>" --minutes 5 --language ur-PK     # Urdu narration
+npm run make -- "<topic>" --tts elevenlabs --voice <id>    # needs ELEVENLABS_API_KEY
+npm run make -- "<topic>" --tts kokoro                     # free offline voice (npm i --no-save kokoro-js)
+npm run make -- --plan jobs/<id>/plan.json                 # re-render after editing the script
+npm run make -- --plan examples/demo-plan.json --tts mock  # offline test (silent audio)
+npm run make -- "<topic>" --music my-track.mp3            # your own music (or --music none)
+npm run make -- "<topic>" --skip-render                    # then preview in Remotion Studio
+npm run studio                                             # Studio with the demo plan
+```
+
+| Variable | Needed for |
+|---|---|
+| `ANTHROPIC_API_KEY` | Script writing (not needed with `--plan`) |
+| `ELEVENLABS_API_KEY` | `--tts elevenlabs` |
+| `SCRIPT_MODEL` | Override the Claude model (default `claude-opus-5-5`) |
+| `REMOTION_BROWSER_EXECUTABLE` | Use an existing Chrome/Chromium instead of Remotion's download |
+| `REMOTION_GL` | WebGL backend for 3D scenes (default `angle`, works without a GPU) |
+| `PEXELS_API_KEY` | Optional extra image source (stock photos) |
+
+## What's in a video
+
+| Layer | What it does |
+|---|---|
+| **Real images** | Photos researched automatically from Wikipedia / Wikimedia Commons (+ Pexels with `PEXELS_API_KEY`), credited in `credits.txt` |
+| **17 scene types** | Documentary: `dossier` (case file on a person) · `newspaper` (spin-in front page) · `evidenceBoard` (polaroids + red string) · `photo` (B-roll with callouts) · `focusText` (marker + circle on the key phrase). Motion graphics: `title` · `kinetic` · `map` (globe / zooming map with routes) · `object3d` (Three.js) · `stat` · `bullets` · `comparison` · `process` · `barChart` · `iconGrid` · `timeline` · `quote` |
+| **Transitions** | `cut` · `flash` · `whip` · `zoom` (push cut) · `shake` · `paperTear` · `split` · `spin` · `glitch` · `slide` · `iris` · `lightLeak` · `fade`, picked per scene by the script writer |
+| **Cold open** | Title tears in on frame 0: anamorphic flare sweep, letters fly out of the dark in 3D, metal light-sweep, shockwave; letterbox already in place, no slow fade-up |
+| **Camera shots** | Every scene is "shot": `push` · `pull` · `truckLeft/Right` · `craneUp/Down` · `orbit` (3D swing) · `dutch` · `rackFocus` · `snapZoom`, with a speed ramp (fast on the cut, slow drift after) and out-of-focus foreground dust for parallax depth |
+| **Editing** | Jump cuts at sentence ends, punch-zoom on every reveal, RGB-split impact hits on slammed words / numbers / impact cuts, letterbox on title/kinetic/quote/3D beats |
+| **Backdrops** | Mostly black so everything pops (embossed type, glass panels): `void` · `dots` · `stars` · `warp` · `streaks` · `smoke` · `grid` · `rays` · `tunnel` · `shapes3d` (real Three.js) · `gradient`; never the same twice in a row |
+| **3D** | `object3d` scenes with an orbiting camera, rim lights, glossy floor and 3D dust; models: atom, planet, globe, dna, crystal, network, cube, lightbulb, gears, rocket, coin, lightning (Tesla coil with live arcs), chip |
+| **Captions** | Bold word-by-word captions (`--captions bold`, default), `subtle`, or `none` |
+| **Colour grade** | `tealOrange` · `warmFilm` · `coldThriller` · `noir` · `vivid`, chosen by the script writer |
+| **Lens** | Film grain, vignette, living background (particles, perspective grid, light blobs, pulse rings) |
+| **Sound** | Layered effects from `sound-packs/` (Kenney, CC0) + cinematic hits in `assets/sfx`: whoosh/glitch/scratch on transitions, pop-ins/drops/switches on reveals, typewriter keys on case files, ticking count-up + boom on numbers, shutter clicks on jump cuts, success + glass on the finale. Variants rotate so repeats never sound identical (`src/shared/sfx.ts`) |
+| **Music** | Generated ambient pad (or `--music your-track.mp3`), automatically ducked under the voice |
+
+Items in a scene carry a `cue`: words copied from the narration. The item appears on the exact frame the
+voice says them. To add a scene type, follow `.claude/skills/explainer-video/SKILL.md`.
+
+## Development
+
+```bash
+npm run typecheck
+npm test
+npm run skills:install   # fetch Remotion + motion-design agent skills into .claude/skills/
+```
+
+## Licensing note
+
+Rendering uses [Remotion](https://www.remotion.dev/license): free for individuals and companies of
+up to 3 people; larger companies need a Remotion company license.
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for what comes next (AI images, music, Manim, 3D, 10-minute videos).
+
+---
+
+### Roman Urdu: jaldi shuru karein
+
+**GitHub par (aapke computer ki zarurat nahi):** Settings → Secrets mein `ANTHROPIC_API_KEY` daalein, phir
+Actions → "Make video" → Run workflow mein topic likhein. Video run ke **Artifacts** mein milegi.
+
+**Apne computer par:**
+
+1. `npm install`
+2. `export ANTHROPIC_API_KEY=...`
+3. `npm run make -- "aapka topic" --minutes 2 --language ur-PK`
+4. Video `jobs/<id>/video.mp4` mein milegi. Script badalni ho to `jobs/<id>/plan.json` edit karke
+   `npm run make -- --plan jobs/<id>/plan.json` chalayein.
