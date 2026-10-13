@@ -487,7 +487,7 @@ export const Object3DScene: React.FC<SceneProps<"object3d">> = ({ visual, reveal
       ) : (
         <OrbitalFallback frame={frame} theme={theme} scale={intro} />
       )}
-      <div style={{ position: "absolute", top: 150, left: 0, right: 0, textAlign: "center", fontFamily: DISPLAY_FONT, fontSize: 64, fontWeight: 900, color: theme.text, textShadow: emboss(theme) }}>
+      <div style={{ position: "absolute", top: 210, left: 0, right: 0, textAlign: "center", fontFamily: DISPLAY_FONT, fontSize: 60, fontWeight: 900, color: theme.text, textShadow: emboss(theme) }}>
         {visual.heading}
       </div>
       {visual.labels.slice(0, 4).map((l, i) => (
